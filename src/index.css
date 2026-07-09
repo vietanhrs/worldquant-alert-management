@@ -1901,6 +1901,213 @@ a {
   color: var(--wq-green);
 }
 
+:root[data-mantine-color-scheme='light'] .main-content {
+  background: #ffffff;
+}
+
+:root[data-mantine-color-scheme='light'] .screen-grid,
+:root[data-mantine-color-scheme='light'] .queue-layout,
+:root[data-mantine-color-scheme='light'] .incident-layout,
+:root[data-mantine-color-scheme='light'] .review-layout {
+  gap: 24px;
+}
+
+:root[data-mantine-color-scheme='light'] .panel,
+:root[data-mantine-color-scheme='light'] .metric-card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+:root[data-mantine-color-scheme='light'] .panel-header {
+  border-bottom: 0;
+  min-height: auto;
+  padding: 0 0 8px;
+}
+
+:root[data-mantine-color-scheme='light'] .panel-header .mantine-ThemeIcon-root {
+  background: transparent;
+  color: #44546f;
+  height: 24px;
+  width: 24px;
+}
+
+:root[data-mantine-color-scheme='light'] .panel-header .mantine-Group-root {
+  gap: 6px;
+}
+
+:root[data-mantine-color-scheme='light'] .panel-header h2 {
+  color: #172b4d;
+  font-size: 14px;
+}
+
+:root[data-mantine-color-scheme='light'] .panel-body {
+  padding: 0;
+}
+
+:root[data-mantine-color-scheme='light'] .metric-card {
+  background: #f7f8f9;
+  min-height: 96px;
+  padding: 14px 16px;
+}
+
+:root[data-mantine-color-scheme='light'] .metric-card.tone-critical {
+  background: #fff4f2;
+}
+
+:root[data-mantine-color-scheme='light'] .metric-card.tone-warning {
+  background: #fff7d6;
+}
+
+:root[data-mantine-color-scheme='light'] .metric-card.tone-success {
+  background: #f0f8e7;
+}
+
+:root[data-mantine-color-scheme='light'] .metric-card.tone-info {
+  background: #f0f6ff;
+}
+
+:root[data-mantine-color-scheme='light'] .sidebar-shift-card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid #f1f2f4;
+  padding: 14px 8px 0;
+}
+
+:root[data-mantine-color-scheme='light'] .alert-stack,
+:root[data-mantine-color-scheme='light'] .incident-list,
+:root[data-mantine-color-scheme='light'] .service-risk-grid,
+:root[data-mantine-color-scheme='light'] .coverage-stack,
+:root[data-mantine-color-scheme='light'] .silence-stack,
+:root[data-mantine-color-scheme='light'] .policy-stack,
+:root[data-mantine-color-scheme='light'] .action-item-stack,
+:root[data-mantine-color-scheme='light'] .recommendation-stack,
+:root[data-mantine-color-scheme='light'] .hypothesis-stack,
+:root[data-mantine-color-scheme='light'] .prototype-task-list,
+:root[data-mantine-color-scheme='light'] .role-list,
+:root[data-mantine-color-scheme='light'] .evidence-stack,
+:root[data-mantine-color-scheme='light'] .mini-timeline {
+  gap: 0;
+}
+
+:root[data-mantine-color-scheme='light'] .alert-summary,
+:root[data-mantine-color-scheme='light'] .incident-card,
+:root[data-mantine-color-scheme='light'] .service-risk-row,
+:root[data-mantine-color-scheme='light'] .coverage-row,
+:root[data-mantine-color-scheme='light'] .silence-card,
+:root[data-mantine-color-scheme='light'] .policy-card,
+:root[data-mantine-color-scheme='light'] .recommendation-card,
+:root[data-mantine-color-scheme='light'] .action-item,
+:root[data-mantine-color-scheme='light'] .hypothesis-card,
+:root[data-mantine-color-scheme='light'] .handoff-card,
+:root[data-mantine-color-scheme='light'] .outline-block,
+:root[data-mantine-color-scheme='light'] .task-card,
+:root[data-mantine-color-scheme='light'] .dependency-node,
+:root[data-mantine-color-scheme='light'] .flow-step,
+:root[data-mantine-color-scheme='light'] .meta-card,
+:root[data-mantine-color-scheme='light'] .evidence,
+:root[data-mantine-color-scheme='light'] .incident-status-card,
+:root[data-mantine-color-scheme='light'] .profile-block,
+:root[data-mantine-color-scheme='light'] .role-list div,
+:root[data-mantine-color-scheme='light'] .prototype-task-list div {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #f1f2f4;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-mantine-color-scheme='light'] .alert-summary:hover,
+:root[data-mantine-color-scheme='light'] .incident-card:hover,
+:root[data-mantine-color-scheme='light'] .service-risk-row:hover,
+:root[data-mantine-color-scheme='light'] .coverage-row:hover,
+:root[data-mantine-color-scheme='light'] .silence-card:hover,
+:root[data-mantine-color-scheme='light'] .policy-card:hover,
+:root[data-mantine-color-scheme='light'] .recommendation-card:hover,
+:root[data-mantine-color-scheme='light'] .action-item:hover,
+:root[data-mantine-color-scheme='light'] .hypothesis-card:hover,
+:root[data-mantine-color-scheme='light'] .task-card:hover,
+:root[data-mantine-color-scheme='light'] .dependency-node:hover,
+:root[data-mantine-color-scheme='light'] .meta-card:hover,
+:root[data-mantine-color-scheme='light'] .evidence:hover,
+:root[data-mantine-color-scheme='light'] .role-list div:hover,
+:root[data-mantine-color-scheme='light'] .prototype-task-list div:hover {
+  background: #f7f8f9;
+}
+
+:root[data-mantine-color-scheme='light'] .incident-status-card,
+:root[data-mantine-color-scheme='light'] .profile-block,
+:root[data-mantine-color-scheme='light'] .handoff-card,
+:root[data-mantine-color-scheme='light'] .ai-card {
+  background: #f7f8f9;
+  border-bottom: 0;
+  border-radius: 3px;
+}
+
+:root[data-mantine-color-scheme='light'] .ai-card {
+  border: 0;
+}
+
+:root[data-mantine-color-scheme='light'] .inspector-hero {
+  background: #f7f8f9;
+  border: 0;
+  border-radius: 3px;
+}
+
+:root[data-mantine-color-scheme='light'] .quality-metric {
+  background: #f7f8f9;
+  border: 0;
+  border-radius: 3px;
+}
+
+:root[data-mantine-color-scheme='light'] .table-wrap {
+  border: 0;
+  border-radius: 0;
+}
+
+:root[data-mantine-color-scheme='light'] .ops-table th {
+  background: #f7f8f9;
+  color: #44546f;
+}
+
+:root[data-mantine-color-scheme='light'] .ops-table td {
+  border-top-color: #f1f2f4;
+}
+
+:root[data-mantine-color-scheme='light'] .schedule-grid,
+:root[data-mantine-color-scheme='light'] .silence-flow,
+:root[data-mantine-color-scheme='light'] .dependency-grid,
+:root[data-mantine-color-scheme='light'] .task-board,
+:root[data-mantine-color-scheme='light'] .quality-grid,
+:root[data-mantine-color-scheme='light'] .history-grid,
+:root[data-mantine-color-scheme='light'] .feedback-grid,
+:root[data-mantine-color-scheme='light'] .evidence-grid {
+  gap: 8px;
+}
+
+:root[data-mantine-color-scheme='light'] .schedule-slot,
+:root[data-mantine-color-scheme='light'] .flow-step,
+:root[data-mantine-color-scheme='light'] .dependency-node,
+:root[data-mantine-color-scheme='light'] .task-card,
+:root[data-mantine-color-scheme='light'] .evidence {
+  background: #f7f8f9;
+  border: 0;
+  border-bottom: 0;
+  border-radius: 3px;
+}
+
+:root[data-mantine-color-scheme='light'] .schedule-slot.active,
+:root[data-mantine-color-scheme='light'] .flow-step.active {
+  background: #e9f2fe;
+  box-shadow: inset 2px 0 0 #1868db;
+}
+
+:root[data-mantine-color-scheme='light'] .soft-divider,
+:root[data-mantine-color-scheme='light'] .wq-tabs .mantine-Tabs-list {
+  border-color: #f1f2f4;
+}
+
 @media (max-width: 1260px) {
   .app-header {
     grid-template-columns: auto minmax(220px, 1fr) auto;
