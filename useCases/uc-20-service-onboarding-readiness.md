@@ -1,14 +1,9 @@
 # UC-20 - Onboard A New Service And Validate Alert Readiness
 
-## Primary Users
+## User Groups From Product Map
 
-- Service owner.
-- Alert admin.
-
-## Supporting Users
-
-- On-call responder.
-- Engineering manager / reliability lead.
+- Primary: Service owner / platform engineer; Alert admin.
+- Supporting: On-call responder; Engineering manager / reliability lead.
 
 ## Main Screens
 
@@ -49,4 +44,3 @@ to an on-call rotation.
 - New services do not generate unowned or untriageable alerts.
 - Production alerting starts with runbooks and escalation paths in place.
 - Readiness gaps are visible before incidents happen.
-

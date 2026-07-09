@@ -1,9 +1,9 @@
 # UC-06 - Escalate When Impact Or SLA Risk Increases
 
-## Primary Users
+## User Groups From Product Map
 
-- On-call responder.
-- Incident commander.
+- Primary: On-call responder; Incident commander.
+- Supporting: Engineering manager / reliability lead.
 
 ## Main Screens
 
@@ -40,4 +40,3 @@ service, or becomes linked to an active incident.
 - Escalation reaches the correct responder/team.
 - Escalation reason and time are auditable.
 - Incident commander can see escalation status without asking in chat.
-

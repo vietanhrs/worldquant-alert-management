@@ -1,9 +1,9 @@
 # UC-05 - Assign Or Reassign To The Right Owner/Team
 
-## Primary Users
+## User Groups From Product Map
 
-- On-call responder.
-- Service owner.
+- Primary: On-call responder; Service owner / platform engineer.
+- Supporting: Alert admin.
 
 ## Main Screens
 
@@ -40,4 +40,3 @@ responsible.
 - Alert reaches the correct team with minimal back-and-forth.
 - Reassignment history is traceable.
 - No alert remains unowned when response SLA is at risk.
-

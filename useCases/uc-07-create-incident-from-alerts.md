@@ -1,9 +1,9 @@
 # UC-07 - Create An Incident From One Or Many Alerts
 
-## Primary Users
+## User Groups From Product Map
 
-- On-call responder.
-- Incident commander.
+- Primary: On-call responder; Incident commander.
+- Supporting: Service owner / platform engineer.
 
 ## Main Screens
 
@@ -40,4 +40,3 @@ requires coordination across people/teams.
 - Related alerts become one coordinated response.
 - Incident Room starts with useful context.
 - Duplicate incident creation is minimized.
-

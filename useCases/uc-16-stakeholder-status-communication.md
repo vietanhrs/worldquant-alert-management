@@ -1,14 +1,9 @@
 # UC-16 - Communicate Incident Status To Stakeholders
 
-## Primary Users
+## User Groups From Product Map
 
-- Incident commander.
-
-## Supporting Users
-
-- Quant/research/business stakeholder.
-- Communications owner.
-- Engineering manager / reliability lead.
+- Primary: Incident commander.
+- Supporting: Quant/research/business stakeholder; Engineering manager / reliability lead; Compliance/audit viewer.
 
 ## Main Screens
 
@@ -48,4 +43,3 @@ business-critical service that stakeholders depend on.
 - Stakeholders understand impact and progress without interrupting responders.
 - Incident team avoids conflicting status messages.
 - Post-incident review can reference the communication timeline.
-

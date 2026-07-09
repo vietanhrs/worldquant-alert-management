@@ -1,13 +1,9 @@
 # UC-15 - Configure Alert Routing/Escalation Rules
 
-## Primary Users
+## User Groups From Product Map
 
-- Alert admin.
-
-## Supporting Users
-
-- Service owner.
-- Engineering manager / reliability lead.
+- Primary: Alert admin.
+- Supporting: Service owner / platform engineer; Engineering manager / reliability lead; Compliance/audit viewer.
 
 ## Main Screens
 
@@ -46,4 +42,3 @@ alert-quality review shows incorrect routing.
 - Alerts route to correct on-call responders.
 - Policy changes do not accidentally create coverage gaps.
 - Audit history explains who changed routing and why.
-

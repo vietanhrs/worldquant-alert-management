@@ -1,9 +1,9 @@
 # UC-09 - Use Evidence, Runbooks And AI Suggestions Without Blind Trust
 
-## Primary Users
+## User Groups From Product Map
 
-- Responders.
-- Service owners.
+- Primary: On-call responder; Service owner / platform engineer.
+- Supporting: Incident commander.
 
 ## Main Screens
 
@@ -41,4 +41,3 @@ links or AI-assisted triage.
 - User can understand why a suggestion was made.
 - AI support speeds triage without hiding uncertainty.
 - Accepted/dismissed AI actions are auditable.
-

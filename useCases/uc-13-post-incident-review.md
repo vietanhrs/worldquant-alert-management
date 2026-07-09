@@ -1,9 +1,9 @@
 # UC-13 - Produce A Post-Incident Review And Action Items
 
-## Primary Users
+## User Groups From Product Map
 
-- Incident commander.
-- Engineering manager / reliability lead.
+- Primary: Incident commander; Engineering manager / reliability lead.
+- Supporting: Service owner / platform engineer; Compliance/audit viewer.
 
 ## Main Screens
 
@@ -38,4 +38,3 @@ An incident is resolved or moved to post-incident review.
 - Review can be produced faster than manual copy-paste from chat/logs.
 - Action items are trackable after review completion.
 - Alert-system improvements are captured, not only incident narrative.
-

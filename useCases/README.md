@@ -4,6 +4,20 @@ This folder breaks the product use case map into one Markdown file per use
 case. Each file can be linked back to the screen specs and later to UI mockup
 routes/components.
 
+## Canonical User Groups
+
+Use case files refer to the same provisional user groups defined at the top of
+the screen documentation. Keeping these names consistent makes the product map,
+screen specs and later UI implementation traceable.
+
+- On-call responder.
+- Incident commander.
+- Service owner / platform engineer.
+- Engineering manager / reliability lead.
+- Quant/research/business stakeholder.
+- Compliance/audit viewer.
+- Alert admin.
+
 | ID | Use case | File |
 | --- | --- | --- |
 | UC-01 | Start an on-call shift and understand current risk | [uc-01-start-on-call-shift.md](uc-01-start-on-call-shift.md) |

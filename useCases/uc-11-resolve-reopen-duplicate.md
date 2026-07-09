@@ -1,9 +1,9 @@
 # UC-11 - Resolve, Reopen Or Mark Duplicate With Reason
 
-## Primary Users
+## User Groups From Product Map
 
-- Responders.
-- Incident commander.
+- Primary: On-call responder; Incident commander.
+- Supporting: Compliance/audit viewer; Service owner / platform engineer.
 
 ## Main Screens
 
@@ -40,4 +40,3 @@ as duplicate.
 - Closed items remain auditable.
 - Reopen and duplicate patterns can be analyzed later.
 - Users do not mistake resolved, silenced and duplicate states.
-

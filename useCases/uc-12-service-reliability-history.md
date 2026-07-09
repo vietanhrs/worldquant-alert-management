@@ -1,9 +1,9 @@
 # UC-12 - Review Service Reliability History And Dependencies
 
-## Primary Users
+## User Groups From Product Map
 
-- Service owner.
-- Platform engineer.
+- Primary: Service owner / platform engineer.
+- Supporting: On-call responder; Engineering manager / reliability lead.
 
 ## Main Screens
 
@@ -39,4 +39,3 @@ pattern.
 - Service owner can identify the highest-leverage reliability improvement.
 - Recurring incidents and noisy alerts are visible.
 - Follow-up actions connect back to services and rules.
-

@@ -1,8 +1,9 @@
 # UC-03 - Triage A Critical Alert In The First 5-10 Minutes
 
-## Primary Users
+## User Groups From Product Map
 
-- On-call responder.
+- Primary: On-call responder.
+- Supporting: Service owner / platform engineer.
 
 ## Main Screens
 
@@ -40,4 +41,3 @@ A critical production alert fires.
 - User can reach a first decision in under 5 minutes.
 - User does not need many external tabs before first action.
 - Every action is recorded with actor, time and optional reason.
-

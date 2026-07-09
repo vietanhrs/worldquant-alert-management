@@ -1,9 +1,9 @@
 # UC-08 - Collaborate During An Incident With Roles And Tasks
 
-## Primary Users
+## User Groups From Product Map
 
-- Incident commander.
-- Responders.
+- Primary: Incident commander; On-call responder.
+- Supporting: Service owner / platform engineer; Engineering manager / reliability lead.
 
 ## Main Screens
 
@@ -23,7 +23,7 @@ An incident is opened or an active incident needs coordinated response.
 1. Incident commander opens Incident Room.
 2. Commander assigns roles such as commander, tech lead and communications
    owner.
-3. Responders add facts, hypotheses, decisions and tasks.
+3. On-call responders add facts, hypotheses, decisions and tasks.
 4. Evidence and runbooks are linked to the timeline.
 5. Team resolves, monitors, hands off or escalates from the room.
 
@@ -39,4 +39,3 @@ An incident is opened or an active incident needs coordinated response.
 - Team members understand who owns what.
 - Decisions are auditable and easy to review later.
 - Handoff does not require reconstructing context from chat.
-

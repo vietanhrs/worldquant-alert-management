@@ -1,13 +1,9 @@
 # UC-01 - Start An On-call Shift And Understand Current Risk
 
-## Primary Users
+## User Groups From Product Map
 
-- On-call responder.
-
-## Supporting Users
-
-- Incident commander.
-- Engineering manager / reliability lead.
+- Primary: On-call responder.
+- Supporting: Incident commander; Engineering manager / reliability lead.
 
 ## Main Screens
 
@@ -46,4 +42,3 @@ responder.
 - User can identify whether the shift is safe within 30 seconds.
 - User can see which alert or incident needs attention first.
 - Handoff acceptance is recorded with actor and timestamp.
-

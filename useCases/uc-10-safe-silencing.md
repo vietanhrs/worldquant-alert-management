@@ -1,9 +1,9 @@
 # UC-10 - Silence Planned Maintenance Or Noisy Duplicates Safely
 
-## Primary Users
+## User Groups From Product Map
 
-- Alert admin.
-- Service owner.
+- Primary: Alert admin; Service owner / platform engineer.
+- Supporting: On-call responder; Compliance/audit viewer.
 
 ## Main Screens
 
@@ -41,4 +41,3 @@ that is firing without useful action.
 - Noise is reduced without hiding unrelated critical alerts.
 - Every silence has actor, time, scope, duration and reason.
 - Expiring silences are visible before they surprise responders.
-

@@ -1,14 +1,9 @@
 # UC-17 - Manage Notification Preferences And Subscriptions
 
-## Primary Users
+## User Groups From Product Map
 
-- On-call responder.
-- Alert admin.
-
-## Supporting Users
-
-- Service owner.
-- Engineering manager / reliability lead.
+- Primary: On-call responder; Alert admin.
+- Supporting: Service owner / platform engineer; Engineering manager / reliability lead.
 
 ## Main Screens
 
@@ -51,4 +46,3 @@ service, or experiences notification noise.
 - Users receive actionable alerts and mentions.
 - Notification fatigue is reduced without weakening incident response.
 - Team policies remain auditable and distinct from personal preferences.
-

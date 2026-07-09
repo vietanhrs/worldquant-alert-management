@@ -1,14 +1,9 @@
 # UC-18 - Improve Or Create Runbooks From Incident Learning
 
-## Primary Users
+## User Groups From Product Map
 
-- Service owner.
-- On-call responder.
-
-## Supporting Users
-
-- Incident commander.
-- Alert admin.
+- Primary: Service owner / platform engineer; On-call responder.
+- Supporting: Incident commander; Alert admin.
 
 ## Main Screens
 
@@ -50,4 +45,3 @@ review identifies missing response steps.
 - Critical alerts have usable runbooks.
 - Future responders need fewer external context switches.
 - Runbook quality improves through incident learning.
-

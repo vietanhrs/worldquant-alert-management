@@ -1,9 +1,9 @@
 # UC-02 - Scan Active Alerts And Choose What Needs Action First
 
-## Primary Users
+## User Groups From Product Map
 
-- On-call responder.
-- Engineering manager / reliability lead.
+- Primary: On-call responder.
+- Supporting: Engineering manager / reliability lead.
 
 ## Main Screens
 
@@ -43,4 +43,3 @@ live operational health.
 - User can identify the highest-priority alert without opening every detail.
 - The queue supports comparing severity, ownership, impact and age quickly.
 - Noise and duplicate candidates are visible before bulk action.
-

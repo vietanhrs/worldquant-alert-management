@@ -1,8 +1,9 @@
 # UC-14 - Measure Response Quality And Alert Quality
 
-## Primary Users
+## User Groups From Product Map
 
-- Engineering manager / reliability lead.
+- Primary: Engineering manager / reliability lead.
+- Supporting: Service owner / platform engineer; Alert admin.
 
 ## Main Screens
 
@@ -40,4 +41,3 @@ post-incident process.
 - Reliability lead can identify where to invest improvement effort.
 - Metrics support product decisions and team alignment.
 - Alert quality is measured separately from response speed.
-

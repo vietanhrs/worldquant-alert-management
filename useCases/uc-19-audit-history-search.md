@@ -1,14 +1,9 @@
 # UC-19 - Search Audit History And Historical Incidents
 
-## Primary Users
+## User Groups From Product Map
 
-- Compliance/audit viewer.
-- Engineering manager / reliability lead.
-
-## Supporting Users
-
-- Incident commander.
-- Service owner.
+- Primary: Compliance/audit viewer; Engineering manager / reliability lead.
+- Supporting: Incident commander; Service owner / platform engineer.
 
 ## Main Screens
 
@@ -48,4 +43,3 @@ silenced/resolved, or searches for similar historical events.
 - Audit viewer can answer who did what, when and why.
 - Reliability lead can identify recurring patterns from history.
 - Similar historical incidents help current responders triage faster.
-

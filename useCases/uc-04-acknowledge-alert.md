@@ -1,8 +1,9 @@
 # UC-04 - Acknowledge An Alert With Ownership/Audit Trail
 
-## Primary Users
+## User Groups From Product Map
 
-- On-call responder.
+- Primary: On-call responder.
+- Supporting: Incident commander; Compliance/audit viewer.
 
 ## Main Screens
 
@@ -37,4 +38,3 @@ An unacknowledged alert is selected.
 - Alert no longer appears as unacknowledged.
 - Other responders can see ownership status immediately.
 - Audit trail is complete enough for post-incident review.
-
