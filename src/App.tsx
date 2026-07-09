@@ -391,7 +391,13 @@ function Workspace() {
           >
             {sidebarOpen ? <IconX size={18} /> : <IconMenu2 size={18} />}
           </ActionIcon>
-          <img src="/assets/worldquant.png" alt="WorldQuant" className="brand-wordmark" />
+          <div className="product-lockup" aria-label="WorldQuant Alert Management">
+            <span className="app-switcher" aria-hidden="true">
+              <IconLayoutDashboard size={18} stroke={1.8} />
+            </span>
+            <img src="/assets/worldquant.png" alt="WorldQuant" className="product-wordmark" />
+            <span className="product-name">Alert Management</span>
+          </div>
           <Badge className="environment-badge">Production</Badge>
         </div>
 
