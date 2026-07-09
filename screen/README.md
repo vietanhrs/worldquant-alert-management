@@ -55,6 +55,11 @@ must be validated later through problem interviews.
 | UC-13 | Produce a post-incident review and action items | Incident commander, manager | Post-Incident Review |
 | UC-14 | Measure response quality and alert quality | Manager, reliability lead | Operations Dashboard, Post-Incident Review |
 | UC-15 | Configure alert routing/escalation rules | Alert admin | Silences & Rules, On-call & Escalation |
+| UC-16 | Communicate incident status to stakeholders | Incident commander, quant/research/business stakeholder | Incident Room, Post-Incident Review |
+| UC-17 | Manage notification preferences and subscriptions | On-call responder, alert admin | App Shell, On-call & Escalation, Silences & Rules |
+| UC-18 | Improve or create runbooks from incident learning | Service owner, responder | Alert Detail Inspector, Service Detail, Post-Incident Review |
+| UC-19 | Search audit history and historical incidents | Compliance/audit viewer, reliability lead | Alert Detail Inspector, Incident Room, Service Detail, Post-Incident Review |
+| UC-20 | Onboard a new service and validate alert readiness | Service owner, alert admin | Service Detail, Silences & Rules, On-call & Escalation |
 
 ## Screen Set
 

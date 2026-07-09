@@ -21,4 +21,8 @@ routes/components.
 | UC-13 | Produce a post-incident review and action items | [uc-13-post-incident-review.md](uc-13-post-incident-review.md) |
 | UC-14 | Measure response quality and alert quality | [uc-14-measure-response-alert-quality.md](uc-14-measure-response-alert-quality.md) |
 | UC-15 | Configure alert routing/escalation rules | [uc-15-configure-routing-escalation.md](uc-15-configure-routing-escalation.md) |
-
+| UC-16 | Communicate incident status to stakeholders | [uc-16-stakeholder-status-communication.md](uc-16-stakeholder-status-communication.md) |
+| UC-17 | Manage notification preferences and subscriptions | [uc-17-notification-preferences.md](uc-17-notification-preferences.md) |
+| UC-18 | Improve or create runbooks from incident learning | [uc-18-runbook-improvement.md](uc-18-runbook-improvement.md) |
+| UC-19 | Search audit history and historical incidents | [uc-19-audit-history-search.md](uc-19-audit-history-search.md) |
+| UC-20 | Onboard a new service and validate alert readiness | [uc-20-service-onboarding-readiness.md](uc-20-service-onboarding-readiness.md) |
