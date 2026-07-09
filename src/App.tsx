@@ -112,9 +112,10 @@ type NavItem = {
 
 const theme = createTheme({
   primaryColor: 'wqGreen',
-  fontFamily: 'Inter, Arial, sans-serif',
+  fontFamily: '"Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   headings: {
-    fontFamily: 'Inter, Arial, sans-serif',
+    fontFamily:
+      '"Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     fontWeight: '500',
   },
   colors: {
