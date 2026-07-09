@@ -4,38 +4,35 @@
   color-scheme: dark;
   --wq-black: #000000;
   --wq-white: #ffffff;
-  --wq-green: #00e128;
-  --wq-brain-blue: #0a8afa;
+  --wq-green: #22c55e;
+  --wq-brain-blue: #579dff;
   --wq-indigo: #2528f4;
-  --wq-orange: #f0913c;
-  --wq-orange-hot: #fc4017;
-  --wq-orange-border: #fa8c24;
-  --severity-warning: #ffb84d;
-  --font-app: Inter, Arial, sans-serif;
+  --wq-orange: #f18d13;
+  --wq-orange-hot: #f15b50;
+  --wq-orange-border: #f18d13;
+  --severity-warning: #f5cd47;
+  --font-app: "Atlassian Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  --bg-app: #000000;
-  --bg-app-gradient:
-    radial-gradient(circle at top right, rgba(10, 138, 250, 0.13), transparent 30rem),
-    radial-gradient(circle at left 35%, rgba(0, 225, 40, 0.07), transparent 24rem),
-    linear-gradient(180deg, #000 0%, #060606 52%, #000 100%);
-  --bg-header: rgba(0, 0, 0, 0.9);
-  --bg-sidebar: rgba(0, 0, 0, 0.92);
-  --bg-panel: #111111;
-  --bg-panel-raised: #1a1a1a;
-  --bg-panel-muted: #080808;
-  --bg-input: #111111;
-  --bg-table-header: #070707;
-  --border-subtle: #333333;
-  --border-strong: #666666;
-  --text-primary: #ffffff;
-  --text-secondary: #cccccc;
-  --text-muted: #999999;
+  --bg-app: #0b0d10;
+  --bg-app-gradient: #0b0d10;
+  --bg-header: rgba(11, 13, 16, 0.96);
+  --bg-sidebar: #0b0d10;
+  --bg-panel: #111417;
+  --bg-panel-raised: #161a1d;
+  --bg-panel-muted: #0f1215;
+  --bg-input: #101418;
+  --bg-table-header: #11161b;
+  --border-subtle: #2a3138;
+  --border-strong: #596773;
+  --text-primary: #f7f8f9;
+  --text-secondary: #c7d1db;
+  --text-muted: #8993a4;
   --text-inverse: #000000;
-  --shadow-panel: 0 18px 50px rgba(0, 0, 0, 0.28);
-  --critical-surface: linear-gradient(135deg, rgba(252, 64, 23, 0.15), transparent 72%);
-  --green-surface: rgba(0, 225, 40, 0.11);
-  --blue-surface: rgba(10, 138, 250, 0.13);
-  --orange-surface: rgba(250, 140, 36, 0.13);
+  --shadow-panel: none;
+  --critical-surface: rgba(241, 91, 80, 0.12);
+  --green-surface: rgba(34, 197, 94, 0.14);
+  --blue-surface: rgba(87, 157, 255, 0.13);
+  --orange-surface: rgba(241, 141, 19, 0.13);
 }
 
 :root[data-mantine-color-scheme='light'] {
@@ -1899,6 +1896,323 @@ a {
 
 .prototype-task-list svg {
   color: var(--wq-green);
+}
+
+:root[data-mantine-color-scheme='dark'] body {
+  font-size: 14px;
+  line-height: 1.4286;
+}
+
+:root[data-mantine-color-scheme='dark'] .app-header {
+  backdrop-filter: none;
+  border-bottom-color: #1f252b;
+  box-shadow: none;
+  min-height: 58px;
+  padding: 8px 16px;
+}
+
+:root[data-mantine-color-scheme='dark'] .workspace-shell {
+  min-height: calc(100vh - 58px);
+}
+
+:root[data-mantine-color-scheme='dark'] .sidebar {
+  border-right-color: #1f252b;
+  height: calc(100vh - 58px);
+  top: 58px;
+}
+
+:root[data-mantine-color-scheme='dark'] .sidebar-brand {
+  border-bottom-color: #1f252b;
+}
+
+:root[data-mantine-color-scheme='dark'] .nav-link {
+  border-color: transparent;
+  border-radius: 3px;
+}
+
+:root[data-mantine-color-scheme='dark'] .nav-link:hover,
+:root[data-mantine-color-scheme='dark'] .nav-link:focus-visible {
+  background: #161a1d;
+  border-color: transparent;
+}
+
+:root[data-mantine-color-scheme='dark'] .nav-link.active {
+  background: rgba(34, 197, 94, 0.13);
+  border-color: transparent;
+  box-shadow: inset 2px 0 0 var(--wq-green);
+}
+
+:root[data-mantine-color-scheme='dark'] .nav-badge,
+:root[data-mantine-color-scheme='dark'] .header-pill,
+:root[data-mantine-color-scheme='dark'] .avatar-trigger {
+  background: #101418;
+  border-color: #2a3138;
+}
+
+:root[data-mantine-color-scheme='dark'] .header-pill:first-child {
+  background: rgba(241, 91, 80, 0.09);
+  border-color: rgba(241, 91, 80, 0.38);
+}
+
+:root[data-mantine-color-scheme='dark'] .environment-badge {
+  background: rgba(34, 197, 94, 0.13);
+  border-color: transparent;
+}
+
+:root[data-mantine-color-scheme='dark'] .global-search input,
+:root[data-mantine-color-scheme='dark'] .control input,
+:root[data-mantine-color-scheme='dark'] .control .mantine-Select-input,
+:root[data-mantine-color-scheme='dark'] .control.mantine-SegmentedControl-root {
+  background: #101418;
+  border-color: #3b444f;
+  min-height: 36px;
+}
+
+:root[data-mantine-color-scheme='dark'] .btn-primary,
+:root[data-mantine-color-scheme='dark'] .btn-outline,
+:root[data-mantine-color-scheme='dark'] .btn-warning {
+  border-radius: 3px;
+  min-height: 36px;
+}
+
+:root[data-mantine-color-scheme='dark'] .btn-primary {
+  --button-bg: #22c55e;
+  --button-hover: #16a34a;
+  --button-bd: 1px solid transparent;
+  background: #22c55e;
+  border-color: transparent;
+}
+
+:root[data-mantine-color-scheme='dark'] .btn-primary:hover {
+  background: #16a34a;
+}
+
+:root[data-mantine-color-scheme='dark'] .btn-outline {
+  --button-hover: rgba(34, 197, 94, 0.12);
+  --button-bd: 1px solid #22c55e;
+}
+
+:root[data-mantine-color-scheme='dark'] .screen-grid,
+:root[data-mantine-color-scheme='dark'] .queue-layout,
+:root[data-mantine-color-scheme='dark'] .incident-layout,
+:root[data-mantine-color-scheme='dark'] .review-layout {
+  gap: 24px;
+}
+
+:root[data-mantine-color-scheme='dark'] .panel,
+:root[data-mantine-color-scheme='dark'] .metric-card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+:root[data-mantine-color-scheme='dark'] .panel-header {
+  border-bottom: 0;
+  min-height: auto;
+  padding: 0 0 8px;
+}
+
+:root[data-mantine-color-scheme='dark'] .panel-header .mantine-ThemeIcon-root,
+:root[data-mantine-color-scheme='dark'] .brain-icon,
+:root[data-mantine-color-scheme='dark'] .timeline-entry .mantine-ThemeIcon-root {
+  background: rgba(34, 197, 94, 0.12);
+  border: 0;
+  color: #70e39a;
+  height: 24px;
+  width: 24px;
+}
+
+:root[data-mantine-color-scheme='dark'] .panel-header .mantine-Group-root {
+  gap: 6px;
+}
+
+:root[data-mantine-color-scheme='dark'] .panel-header h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+:root[data-mantine-color-scheme='dark'] .panel-body {
+  padding: 0;
+}
+
+:root[data-mantine-color-scheme='dark'] .metric-card {
+  background: #11161b;
+  border-radius: 3px;
+  min-height: 96px;
+  padding: 14px 16px;
+}
+
+:root[data-mantine-color-scheme='dark'] .metric-card.tone-critical {
+  background: linear-gradient(90deg, rgba(241, 91, 80, 0.18), #11161b 72%);
+}
+
+:root[data-mantine-color-scheme='dark'] .metric-card.tone-warning {
+  background: linear-gradient(90deg, rgba(241, 141, 19, 0.18), #11161b 72%);
+}
+
+:root[data-mantine-color-scheme='dark'] .metric-card.tone-success {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.17), #11161b 72%);
+}
+
+:root[data-mantine-color-scheme='dark'] .metric-card.tone-info {
+  background: linear-gradient(90deg, rgba(87, 157, 255, 0.17), #11161b 72%);
+}
+
+:root[data-mantine-color-scheme='dark'] .alert-stack,
+:root[data-mantine-color-scheme='dark'] .incident-list,
+:root[data-mantine-color-scheme='dark'] .service-risk-grid,
+:root[data-mantine-color-scheme='dark'] .coverage-stack,
+:root[data-mantine-color-scheme='dark'] .silence-stack,
+:root[data-mantine-color-scheme='dark'] .policy-stack,
+:root[data-mantine-color-scheme='dark'] .action-item-stack,
+:root[data-mantine-color-scheme='dark'] .recommendation-stack,
+:root[data-mantine-color-scheme='dark'] .hypothesis-stack,
+:root[data-mantine-color-scheme='dark'] .prototype-task-list,
+:root[data-mantine-color-scheme='dark'] .role-list,
+:root[data-mantine-color-scheme='dark'] .evidence-stack,
+:root[data-mantine-color-scheme='dark'] .mini-timeline {
+  gap: 0;
+}
+
+:root[data-mantine-color-scheme='dark'] .alert-summary,
+:root[data-mantine-color-scheme='dark'] .incident-card,
+:root[data-mantine-color-scheme='dark'] .service-risk-row,
+:root[data-mantine-color-scheme='dark'] .coverage-row,
+:root[data-mantine-color-scheme='dark'] .silence-card,
+:root[data-mantine-color-scheme='dark'] .policy-card,
+:root[data-mantine-color-scheme='dark'] .recommendation-card,
+:root[data-mantine-color-scheme='dark'] .action-item,
+:root[data-mantine-color-scheme='dark'] .hypothesis-card,
+:root[data-mantine-color-scheme='dark'] .handoff-card,
+:root[data-mantine-color-scheme='dark'] .outline-block,
+:root[data-mantine-color-scheme='dark'] .task-card,
+:root[data-mantine-color-scheme='dark'] .dependency-node,
+:root[data-mantine-color-scheme='dark'] .flow-step,
+:root[data-mantine-color-scheme='dark'] .meta-card,
+:root[data-mantine-color-scheme='dark'] .evidence,
+:root[data-mantine-color-scheme='dark'] .incident-status-card,
+:root[data-mantine-color-scheme='dark'] .profile-block,
+:root[data-mantine-color-scheme='dark'] .role-list div,
+:root[data-mantine-color-scheme='dark'] .prototype-task-list div {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #1f252b;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-mantine-color-scheme='dark'] .alert-summary:hover,
+:root[data-mantine-color-scheme='dark'] .incident-card:hover,
+:root[data-mantine-color-scheme='dark'] .service-risk-row:hover,
+:root[data-mantine-color-scheme='dark'] .coverage-row:hover,
+:root[data-mantine-color-scheme='dark'] .silence-card:hover,
+:root[data-mantine-color-scheme='dark'] .policy-card:hover,
+:root[data-mantine-color-scheme='dark'] .recommendation-card:hover,
+:root[data-mantine-color-scheme='dark'] .action-item:hover,
+:root[data-mantine-color-scheme='dark'] .hypothesis-card:hover,
+:root[data-mantine-color-scheme='dark'] .task-card:hover,
+:root[data-mantine-color-scheme='dark'] .dependency-node:hover,
+:root[data-mantine-color-scheme='dark'] .meta-card:hover,
+:root[data-mantine-color-scheme='dark'] .evidence:hover,
+:root[data-mantine-color-scheme='dark'] .role-list div:hover,
+:root[data-mantine-color-scheme='dark'] .prototype-task-list div:hover {
+  background: #11161b;
+}
+
+:root[data-mantine-color-scheme='dark'] .incident-status-card,
+:root[data-mantine-color-scheme='dark'] .profile-block,
+:root[data-mantine-color-scheme='dark'] .handoff-card,
+:root[data-mantine-color-scheme='dark'] .ai-card,
+:root[data-mantine-color-scheme='dark'] .inspector-hero,
+:root[data-mantine-color-scheme='dark'] .quality-metric {
+  background: #11161b;
+  border: 0;
+  border-radius: 3px;
+}
+
+:root[data-mantine-color-scheme='dark'] .alert-summary.severity-critical,
+:root[data-mantine-color-scheme='dark'] .incident-card.severity-critical,
+:root[data-mantine-color-scheme='dark'] .inspector-hero.severity-critical {
+  box-shadow: inset 2px 0 0 var(--wq-orange-hot);
+}
+
+:root[data-mantine-color-scheme='dark'] .alert-summary.severity-high,
+:root[data-mantine-color-scheme='dark'] .incident-card.severity-high,
+:root[data-mantine-color-scheme='dark'] .inspector-hero.severity-high {
+  box-shadow: inset 2px 0 0 var(--wq-orange-border);
+}
+
+:root[data-mantine-color-scheme='dark'] .alert-summary.severity-warning,
+:root[data-mantine-color-scheme='dark'] .incident-card.severity-warning,
+:root[data-mantine-color-scheme='dark'] .inspector-hero.severity-warning {
+  box-shadow: inset 2px 0 0 var(--severity-warning);
+}
+
+:root[data-mantine-color-scheme='dark'] .alert-summary.severity-info,
+:root[data-mantine-color-scheme='dark'] .incident-card.severity-info,
+:root[data-mantine-color-scheme='dark'] .inspector-hero.severity-info {
+  box-shadow: inset 2px 0 0 var(--wq-brain-blue);
+}
+
+:root[data-mantine-color-scheme='dark'] .table-wrap {
+  border: 0;
+  border-radius: 0;
+}
+
+:root[data-mantine-color-scheme='dark'] .ops-table th {
+  background: #11161b;
+  color: #aeb9c6;
+  height: 40px;
+}
+
+:root[data-mantine-color-scheme='dark'] .ops-table td {
+  border-top-color: #1f252b;
+  height: 52px;
+}
+
+:root[data-mantine-color-scheme='dark'] .ops-table tr:hover td,
+:root[data-mantine-color-scheme='dark'] .ops-table .selected-row td {
+  background: rgba(34, 197, 94, 0.12);
+}
+
+:root[data-mantine-color-scheme='dark'] .schedule-grid,
+:root[data-mantine-color-scheme='dark'] .silence-flow,
+:root[data-mantine-color-scheme='dark'] .dependency-grid,
+:root[data-mantine-color-scheme='dark'] .task-board,
+:root[data-mantine-color-scheme='dark'] .quality-grid,
+:root[data-mantine-color-scheme='dark'] .history-grid,
+:root[data-mantine-color-scheme='dark'] .feedback-grid,
+:root[data-mantine-color-scheme='dark'] .evidence-grid {
+  gap: 8px;
+}
+
+:root[data-mantine-color-scheme='dark'] .schedule-slot,
+:root[data-mantine-color-scheme='dark'] .flow-step,
+:root[data-mantine-color-scheme='dark'] .dependency-node,
+:root[data-mantine-color-scheme='dark'] .task-card,
+:root[data-mantine-color-scheme='dark'] .evidence {
+  background: #11161b;
+  border: 0;
+  border-radius: 3px;
+}
+
+:root[data-mantine-color-scheme='dark'] .schedule-slot.active,
+:root[data-mantine-color-scheme='dark'] .flow-step.active {
+  background: rgba(87, 157, 255, 0.14);
+  box-shadow: inset 2px 0 0 #579dff;
+}
+
+:root[data-mantine-color-scheme='dark'] .sidebar-shift-card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid #1f252b;
+  padding: 14px 8px 0;
+}
+
+:root[data-mantine-color-scheme='dark'] .soft-divider,
+:root[data-mantine-color-scheme='dark'] .wq-tabs .mantine-Tabs-list {
+  border-color: #1f252b;
 }
 
 :root[data-mantine-color-scheme='light'] .main-content {
