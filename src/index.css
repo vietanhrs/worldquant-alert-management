@@ -772,6 +772,7 @@ a {
 :root[data-mantine-color-scheme='light'] .screen-grid,
 :root[data-mantine-color-scheme='light'] .queue-layout,
 :root[data-mantine-color-scheme='light'] .incident-layout,
+:root[data-mantine-color-scheme='light'] .incident-ticket-panel,
 :root[data-mantine-color-scheme='light'] .review-layout {
   gap: 14px;
   max-width: none;
@@ -1716,6 +1717,49 @@ a {
   font-weight: 500;
 }
 
+.incident-action-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.incident-ticket-panel {
+  margin: 0 auto;
+  max-width: 1460px;
+  width: 100%;
+}
+
+.incident-ticket-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.incident-ticket-toolbar strong,
+.incident-ticket-toolbar span {
+  display: block;
+}
+
+.incident-ticket-toolbar strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.incident-ticket-toolbar span {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+.incident-modal-form {
+  display: grid;
+  gap: 12px;
+}
+
 .task-card {
   display: grid;
   gap: 8px;
@@ -1765,6 +1809,24 @@ a {
 .service-detail-view {
   display: grid;
   gap: 16px;
+}
+
+.service-detail-shell,
+.service-detail-grid,
+.service-workspace-panel {
+  width: 100%;
+}
+
+.service-workspace-panel {
+  min-height: 870px;
+}
+
+.service-workspace-panel .wq-tabs {
+  min-height: 800px;
+}
+
+.service-workspace-panel .mantine-Tabs-panel {
+  min-height: 720px;
 }
 
 .detail-subheader {
@@ -3167,6 +3229,24 @@ a {
 
   .silence-page-actions .mantine-Button-root {
     width: 100%;
+  }
+
+  .incident-action-row,
+  .incident-ticket-toolbar {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .incident-action-row .mantine-Button-root,
+  .incident-ticket-toolbar .mantine-Button-root {
+    width: 100%;
+  }
+
+  .service-workspace-panel,
+  .service-workspace-panel .wq-tabs,
+  .service-workspace-panel .mantine-Tabs-panel {
+    min-height: 0;
   }
 
   .policy-editor-grid,

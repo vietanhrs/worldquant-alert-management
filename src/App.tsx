@@ -141,6 +141,19 @@ type PostMortemDocument = {
   updated: string
 }
 
+type IncidentTicket = {
+  id: string
+  incidentId: string
+  title: string
+  type: 'Decision' | 'Evidence' | 'Follow-up'
+  priority: 'P1' | 'P2' | 'P3'
+  state: 'Open' | 'Doing' | 'Blocked'
+  owner: string
+  due: string
+  source: string
+  updated: string
+}
+
 type NavItem = {
   id: ScreenId
   label: string
@@ -395,6 +408,81 @@ const incidents: Incident[] = [
     age: '2h',
     impact: 'Manual validation required',
     responders: ['Hana', 'Minh'],
+  },
+]
+
+const incidentTickets: IncidentTicket[] = [
+  {
+    id: 'WQ-TKT-9012',
+    incidentId: 'WQ-INC-4819',
+    title: 'Check current mitigation path',
+    type: 'Decision',
+    priority: 'P1',
+    state: 'Doing',
+    owner: 'Trang',
+    due: 'Today 10:15 ICT',
+    source: 'Decision timeline',
+    updated: '4m ago',
+  },
+  {
+    id: 'WQ-TKT-9013',
+    incidentId: 'WQ-INC-4819',
+    title: 'Prepare stakeholder update',
+    type: 'Follow-up',
+    priority: 'P2',
+    state: 'Open',
+    owner: 'Leon',
+    due: 'Today 10:30 ICT',
+    source: 'Commander request',
+    updated: '8m ago',
+  },
+  {
+    id: 'WQ-TKT-9014',
+    incidentId: 'WQ-INC-4819',
+    title: 'Validate recovered batches',
+    type: 'Evidence',
+    priority: 'P1',
+    state: 'Blocked',
+    owner: 'Priya',
+    due: 'Today 10:45 ICT',
+    source: 'Recovery checklist',
+    updated: '11m ago',
+  },
+  {
+    id: 'WQ-TKT-9008',
+    incidentId: 'WQ-INC-4818',
+    title: 'Drain overloaded simulation worker pool',
+    type: 'Decision',
+    priority: 'P2',
+    state: 'Doing',
+    owner: 'Iris',
+    due: 'Today 11:00 ICT',
+    source: 'Mitigation runbook',
+    updated: '13m ago',
+  },
+  {
+    id: 'WQ-TKT-9009',
+    incidentId: 'WQ-INC-4818',
+    title: 'Notify research desk of capacity window',
+    type: 'Follow-up',
+    priority: 'P3',
+    state: 'Open',
+    owner: 'Ken',
+    due: 'Today 11:20 ICT',
+    source: 'Comms plan',
+    updated: '18m ago',
+  },
+  {
+    id: 'WQ-TKT-8997',
+    incidentId: 'WQ-INC-4815',
+    title: 'Attach APAC vendor sample comparison',
+    type: 'Evidence',
+    priority: 'P2',
+    state: 'Open',
+    owner: 'Hana',
+    due: 'Today 12:00 ICT',
+    source: 'Quality dashboard',
+    updated: '31m ago',
   },
 ]
 
@@ -1406,8 +1494,10 @@ function ActiveIncidentRoomsTable({ onOpen }: { onOpen: (incidentId: string) => 
 }
 
 function IncidentRoomDetail({ incident, onBack }: { incident: Incident; onBack: () => void }) {
+  const [activeModal, setActiveModal] = useState<'decision' | 'evidence' | 'ticket' | null>(null)
   const warRoomUrl = `https://meet.worldquant.example/${incident.id.toLowerCase()}`
   const [techLead = 'Trang', comms = 'Priya', watcher = 'Leon'] = incident.responders
+  const tickets = incidentTickets.filter((ticket) => ticket.incidentId === incident.id)
   const roles = [
     `Commander - ${incident.commander}`,
     `Tech lead - ${techLead}`,
@@ -1416,7 +1506,7 @@ function IncidentRoomDetail({ incident, onBack }: { incident: Incident; onBack: 
   ]
 
   return (
-    <div className="service-detail-view">
+    <div className="service-detail-view service-detail-shell">
       <div className="detail-subheader">
         <Button className="btn-outline" leftSection={<IconArrowLeft size={16} />} onClick={onBack}>
           Incident Rooms
@@ -1490,42 +1580,21 @@ function IncidentRoomDetail({ incident, onBack }: { incident: Incident; onBack: 
 
           <Divider className="soft-divider" />
 
-          <div className="incident-entry-grid">
-            <div className="incident-entry-card">
-              <strong>Submit decision</strong>
-              <Textarea
-                className="control"
-                minRows={3}
-                placeholder="Decision, rationale, owner, expected next check"
-              />
-              <Button className="btn-primary" size="sm" leftSection={<IconSend size={16} />}>
-                Submit decision
-              </Button>
-            </div>
-            <div className="incident-entry-card">
-              <strong>Add evidence</strong>
-              <TextInput className="control" placeholder="Dashboard or log URL" />
-              <Textarea className="control" minRows={2} placeholder="Evidence summary" />
-              <Button className="btn-outline" size="sm" leftSection={<IconPlus size={16} />}>
-                Add evidence
-              </Button>
-            </div>
-          </div>
-
-          <Divider className="soft-divider" />
-
-          <div className="task-board">
-            {[
-              ['Check current mitigation path', incident.responders[0] ?? incident.commander, 'Doing'],
-              ['Prepare stakeholder update', comms, 'Open'],
-              ['Validate recovered batches', watcher, 'Blocked'],
-            ].map(([task, owner, state]) => (
-              <div key={task} className="task-card">
-                <strong>{task}</strong>
-                <span>{owner}</span>
-                <Badge className={state === 'Doing' ? 'chip-info' : 'chip-muted'}>{state}</Badge>
-              </div>
-            ))}
+          <div className="incident-action-row">
+            <Button
+              className="btn-primary"
+              leftSection={<IconSend size={16} />}
+              onClick={() => setActiveModal('decision')}
+            >
+              Add decision step
+            </Button>
+            <Button
+              className="btn-outline"
+              leftSection={<IconPlus size={16} />}
+              onClick={() => setActiveModal('evidence')}
+            >
+              Add evidence
+            </Button>
           </div>
         </Panel>
 
@@ -1539,7 +1608,197 @@ function IncidentRoomDetail({ incident, onBack }: { incident: Incident; onBack: 
           </div>
         </Panel>
       </div>
+
+      <Panel title="Incident tickets" icon={IconListCheck} className="incident-ticket-panel">
+        <div className="incident-ticket-toolbar">
+          <div>
+            <strong>{tickets.length} linked tickets</strong>
+            <span>Decision, evidence and follow-up work created during this response.</span>
+          </div>
+          <Button
+            className="btn-primary"
+            leftSection={<IconPlus size={16} />}
+            onClick={() => setActiveModal('ticket')}
+          >
+            Add ticket
+          </Button>
+        </div>
+        <IncidentTicketsTable tickets={tickets} />
+      </Panel>
+
+      <IncidentActionModal
+        mode={activeModal}
+        incident={incident}
+        onClose={() => setActiveModal(null)}
+      />
     </div>
+  )
+}
+
+function IncidentTicketsTable({ tickets }: { tickets: IncidentTicket[] }) {
+  return (
+    <Table.ScrollContainer minWidth={1180} className="table-wrap">
+      <Table className="ops-table" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Ticket</Table.Th>
+            <Table.Th>Type</Table.Th>
+            <Table.Th>Priority</Table.Th>
+            <Table.Th>Status</Table.Th>
+            <Table.Th>Owner</Table.Th>
+            <Table.Th>Due / SLA</Table.Th>
+            <Table.Th>Source</Table.Th>
+            <Table.Th>Updated</Table.Th>
+            <Table.Th>Action</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {tickets.map((ticket) => (
+            <Table.Tr key={ticket.id}>
+              <Table.Td>
+                <div>
+                  <strong>{ticket.title}</strong>
+                  <small>{ticket.id}</small>
+                </div>
+              </Table.Td>
+              <Table.Td>{ticket.type}</Table.Td>
+              <Table.Td>
+                <Badge className={ticket.priority === 'P1' ? 'chip-critical' : 'chip-warning'}>
+                  {ticket.priority}
+                </Badge>
+              </Table.Td>
+              <Table.Td>
+                <Badge className={ticket.state === 'Doing' ? 'chip-info' : 'chip-muted'}>
+                  {ticket.state}
+                </Badge>
+              </Table.Td>
+              <Table.Td>{ticket.owner}</Table.Td>
+              <Table.Td>{ticket.due}</Table.Td>
+              <Table.Td>{ticket.source}</Table.Td>
+              <Table.Td>{ticket.updated}</Table.Td>
+              <Table.Td>
+                <Button className="btn-outline" size="xs" rightSection={<IconArrowRight size={14} />}>
+                  Open
+                </Button>
+              </Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
+  )
+}
+
+function IncidentActionModal({
+  mode,
+  incident,
+  onClose,
+}: {
+  mode: 'decision' | 'evidence' | 'ticket' | null
+  incident: Incident
+  onClose: () => void
+}) {
+  return (
+    <Modal
+      opened={mode !== null}
+      onClose={onClose}
+      title={
+        mode === 'decision'
+          ? 'Add decision step'
+          : mode === 'evidence'
+            ? 'Add evidence'
+            : 'Add ticket'
+      }
+      centered
+      size="lg"
+      className="detail-modal"
+    >
+      {mode === 'decision' && (
+        <div className="incident-modal-form">
+          <Code>{incident.id}</Code>
+          <Textarea
+            label="Decision step"
+            className="control"
+            minRows={4}
+            placeholder="Decision, rationale, owner, expected next check"
+          />
+          <Select
+            label="Owner"
+            className="control"
+            defaultValue={incident.commander}
+            data={[incident.commander, ...incident.responders]}
+          />
+          <TextInput label="Expected next check" className="control" defaultValue="10 minutes" />
+          <div className="silence-modal-actions">
+            <Button className="btn-outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button className="btn-primary" leftSection={<IconSend size={16} />} onClick={onClose}>
+              Submit decision
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {mode === 'evidence' && (
+        <div className="incident-modal-form">
+          <Code>{incident.id}</Code>
+          <TextInput label="Dashboard or log URL" className="control" placeholder="https://" />
+          <Textarea
+            label="Evidence summary"
+            className="control"
+            minRows={4}
+            placeholder="Evidence summary"
+          />
+          <div className="silence-modal-actions">
+            <Button className="btn-outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button className="btn-primary" leftSection={<IconPlus size={16} />} onClick={onClose}>
+              Add evidence
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {mode === 'ticket' && (
+        <div className="silence-modal-form">
+          <TextInput
+            label="Ticket title"
+            className="control span-form-full"
+            placeholder="Follow-up or recovery task"
+          />
+          <Select
+            label="Type"
+            className="control"
+            defaultValue="Follow-up"
+            data={['Decision', 'Evidence', 'Follow-up']}
+          />
+          <Select
+            label="Owner"
+            className="control"
+            defaultValue={incident.responders[0] ?? incident.commander}
+            data={[incident.commander, ...incident.responders]}
+          />
+          <Select label="Priority" className="control" defaultValue="P2" data={['P1', 'P2', 'P3']} />
+          <TextInput label="Due / SLA" className="control" defaultValue="Today 10:45 ICT" />
+          <Textarea
+            label="Context"
+            className="control span-form-full"
+            minRows={3}
+            placeholder="Link the ticket to a decision, evidence item, or recovery checklist"
+          />
+          <div className="silence-modal-actions span-form-full">
+            <Button className="btn-outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button className="btn-primary" leftSection={<IconPlus size={16} />} onClick={onClose}>
+              Add ticket
+            </Button>
+          </div>
+        </div>
+      )}
+    </Modal>
   )
 }
 
@@ -1701,7 +1960,7 @@ function ServiceDetail({
         </div>
       </div>
 
-      <div className="screen-grid">
+      <div className="screen-grid service-detail-grid">
         <Panel title="Service profile" icon={IconServer} className="span-4">
           <div className="profile-block">
             <Code>{service.service}</Code>
@@ -1735,7 +1994,7 @@ function ServiceDetail({
           </div>
         </Panel>
 
-        <Panel title="Service workspace" icon={IconDatabase} className="span-12">
+        <Panel title="Service workspace" icon={IconDatabase} className="span-12 service-workspace-panel">
           <Tabs defaultValue="escalation" className="wq-tabs">
             <Tabs.List>
               <Tabs.Tab value="escalation">Escalation Policy</Tabs.Tab>
