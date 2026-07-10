@@ -177,21 +177,6 @@ a {
   min-width: 0;
 }
 
-.app-switcher {
-  align-items: center;
-  border-radius: 3px;
-  color: var(--text-secondary);
-  display: inline-flex;
-  height: 32px;
-  justify-content: center;
-  width: 32px;
-}
-
-.app-switcher:hover {
-  background: var(--bg-panel-muted);
-  color: var(--text-primary);
-}
-
 .product-wordmark {
   display: block;
   height: 18px;
@@ -211,22 +196,7 @@ a {
   gap: 8px;
 }
 
-:root[data-mantine-color-scheme='light'] .app-switcher:hover {
-  background: #0515240f;
-}
-
 :root[data-mantine-color-scheme='light'] .product-wordmark {
-  filter: invert(1);
-}
-
-.brand-wordmark {
-  display: block;
-  height: 22px;
-  width: auto;
-}
-
-:root[data-mantine-color-scheme='light'] .brand-wordmark,
-:root[data-mantine-color-scheme='light'] .sidebar-brand img {
   filter: invert(1);
 }
 
@@ -409,40 +379,6 @@ a {
   height: calc(100vh - 56px);
   padding: 16px;
   top: 56px;
-}
-
-.sidebar-brand {
-  align-items: center;
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  gap: 12px;
-  padding-bottom: 16px;
-}
-
-:root[data-mantine-color-scheme='light'] .sidebar-brand {
-  gap: 10px;
-  padding-bottom: 14px;
-}
-
-.sidebar-brand img {
-  height: 34px;
-  width: 34px;
-}
-
-.sidebar-brand span,
-.sidebar-brand strong {
-  display: block;
-}
-
-.sidebar-brand span {
-  color: var(--text-muted);
-  font-size: 12px;
-}
-
-.sidebar-brand strong {
-  color: var(--text-primary);
-  font-size: 17px;
-  font-weight: 500;
 }
 
 .sidebar-scroll {
@@ -640,18 +576,6 @@ a {
   font-size: 24px;
   font-weight: 500;
   line-height: 1.25;
-}
-
-.screen-title p {
-  color: var(--text-secondary);
-  line-height: 1.55;
-  margin: 8px 0 0;
-  max-width: 820px;
-}
-
-:root[data-mantine-color-scheme='light'] .screen-title p {
-  line-height: 1.5;
-  margin-top: 6px;
 }
 
 .screen-actions {
@@ -2762,10 +2686,6 @@ a {
   top: 58px;
 }
 
-:root[data-mantine-color-scheme='dark'] .sidebar-brand {
-  border-bottom-color: #1f252b;
-}
-
 :root[data-mantine-color-scheme='dark'] .nav-link {
   border-color: transparent;
   border-radius: 3px;
@@ -3339,10 +3259,6 @@ a {
     display: inline-flex;
   }
 
-  .brand-wordmark {
-    height: 18px;
-  }
-
   .product-wordmark {
     height: 16px;
   }
@@ -3504,10 +3420,6 @@ a {
 @media (max-width: 640px) {
   .screen-title h1 {
     font-size: 24px;
-  }
-
-  .screen-title p {
-    font-size: 14px;
   }
 
   .metric-card strong {

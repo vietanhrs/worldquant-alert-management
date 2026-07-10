@@ -911,9 +911,6 @@ function Workspace() {
             {sidebarOpen ? <IconX size={18} /> : <IconMenu2 size={18} />}
           </ActionIcon>
           <div className="product-lockup" aria-label="WorldQuant Alert Management">
-            <span className="app-switcher" aria-hidden="true">
-              <IconLayoutDashboard size={18} stroke={1.8} />
-            </span>
             <img src="/assets/worldquant.png" alt="WorldQuant" className="product-wordmark" />
             <span className="product-name">Alert Management</span>
           </div>
@@ -931,10 +928,6 @@ function Workspace() {
           <button type="button" className="header-pill">
             <IconFlame size={16} />
             <span>3 incidents</span>
-          </button>
-          <button type="button" className="header-pill">
-            <IconClock size={16} />
-            <span>Shift 2h 18m</span>
           </button>
         </div>
 
@@ -1012,14 +1005,6 @@ function Workspace() {
 
       <div className="workspace-shell">
         <aside className={sidebarOpen ? 'sidebar is-open' : 'sidebar'}>
-          <div className="sidebar-brand">
-            <img src="/assets/wq-logo-square.png" alt="" />
-            <div>
-              <span>Alert Management</span>
-              <strong>Ops Command</strong>
-            </div>
-          </div>
-
           <ScrollArea className="sidebar-scroll">
             {['Monitor', 'Respond', 'Improve', 'Analyze'].map((group) => (
               <nav key={group} className="nav-group" aria-label={group}>
@@ -1060,7 +1045,6 @@ function Workspace() {
           <ScreenTitle
             eyebrow={activeNavItem.group}
             title={screenTitle(activeScreen)}
-            description={screenDescription(activeScreen)}
           />
           {renderScreen(activeScreen)}
         </main>
@@ -3238,18 +3222,15 @@ function scheduleShiftStyle(start: number, duration: number, dayCount: number): 
 function ScreenTitle({
   eyebrow,
   title,
-  description,
 }: {
   eyebrow: string
   title: string
-  description: string
 }) {
   return (
     <section className="screen-title">
       <div>
         <span>{eyebrow}</span>
         <h1>{title}</h1>
-        <p>{description}</p>
       </div>
     </section>
   )
@@ -3437,20 +3418,6 @@ function screenTitle(screen: ScreenId) {
     reports: 'Reports',
   }
   return titles[screen]
-}
-
-function screenDescription(screen: ScreenId) {
-  const descriptions: Record<ScreenId, string> = {
-    dashboard: 'Shift-level risk, live incidents, service health and response quality in one operational surface.',
-    queue: 'Dense triage queue with ownership, impact, evidence and action-ready inspector.',
-    incident: 'Active incident room directory with drill-down response workspace for roles, decisions and evidence.',
-    services: 'Service directory with ownership, reliability health, active risk and drill-down detail.',
-    oncall: 'Coverage, escalation policy and handoff state across teams and time zones.',
-    silences: 'Manage active silences with scoped duration, ownership, audit reason and safe expiry.',
-    review: 'Post-incident document library with drill-down review workspace for evidence and action items.',
-    reports: 'Alert and client error analytics by service, error code, screen and message.',
-  }
-  return descriptions[screen]
 }
 
 function stateClass(state: AlertState) {
