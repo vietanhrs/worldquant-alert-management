@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { ComponentType, ReactNode } from 'react'
+import type { CSSProperties, ComponentType, ReactNode } from 'react'
 import {
   ActionIcon,
   Avatar,
@@ -10,6 +10,7 @@ import {
   Group,
   MantineProvider,
   Menu,
+  Modal,
   Paper,
   Progress,
   RingProgress,
@@ -20,6 +21,7 @@ import {
   Tabs,
   Text,
   TextInput,
+  Textarea,
   ThemeIcon,
   Timeline,
   Tooltip,
@@ -30,6 +32,7 @@ import {
 import type { MantineColorScheme } from '@mantine/core'
 import {
   IconAdjustments,
+  IconArrowLeft,
   IconArrowRight,
   IconBellRinging,
   IconBrain,
@@ -37,23 +40,27 @@ import {
   IconChartBar,
   IconCheck,
   IconChevronDown,
+  IconChevronLeft,
+  IconChevronRight,
   IconClipboardCheck,
   IconClock,
   IconDatabase,
   IconDeviceDesktop,
+  IconExternalLink,
   IconFileAnalytics,
   IconFilter,
   IconFlame,
   IconGitBranch,
-  IconHistory,
   IconLayoutDashboard,
   IconListCheck,
   IconMenu2,
   IconMoon,
   IconPalette,
+  IconPlus,
   IconRadar,
   IconRoute,
   IconSearch,
+  IconSend,
   IconServer,
   IconShieldCheck,
   IconSun,
@@ -89,6 +96,17 @@ type AlertRow = {
   related: number
   runbook: string
   signal: string
+  priority: 'P1' | 'P2' | 'P3' | 'P4'
+  team: string
+  region: string
+  environment: string
+  source: string
+  policy: string
+  opened: string
+  lastSeen: string
+  repeatCount: number
+  dedupeKey: string
+  sla: string
 }
 
 type Incident = {
@@ -109,6 +127,25 @@ type NavItem = {
   icon: ComponentType<{ size?: number; stroke?: number }>
   badge?: string
 }
+
+type ServiceRow = {
+  service: string
+  name: string
+  owner: string
+  health: string
+  alerts: number
+  slo: number
+  noise: string
+  tier: string
+  region: string
+  timezone: string
+  coverage: string
+  dependencyRisk: string
+  runbooks: string
+  lastIncident: string
+}
+
+type OnCallView = 'day' | 'week' | 'two-weeks' | 'month'
 
 const theme = createTheme({
   primaryColor: 'wqGreen',
@@ -164,6 +201,17 @@ const alerts: AlertRow[] = [
     related: 8,
     runbook: 'Data freshness degraded',
     signal: 'p95 lag 421s',
+    priority: 'P1',
+    team: 'Market Data Platform',
+    region: 'US',
+    environment: 'Production',
+    source: 'Datadog SLO',
+    policy: 'Tier 0 market data',
+    opened: '09:42',
+    lastSeen: '09:49',
+    repeatCount: 14,
+    dedupeKey: 'vendor:us:equities:lag',
+    sla: '12m to page L2',
   },
   {
     id: 'WQ-AL-9077',
@@ -177,6 +225,17 @@ const alerts: AlertRow[] = [
     related: 3,
     runbook: 'Scale simulation workers',
     signal: 'queue depth 18.2k',
+    priority: 'P2',
+    team: 'Research Platform',
+    region: 'Global',
+    environment: 'Production',
+    source: 'Prometheus',
+    policy: 'Research compute',
+    opened: '09:31',
+    lastSeen: '09:47',
+    repeatCount: 6,
+    dedupeKey: 'brain-sim:queue:saturation',
+    sla: '22m to L2',
   },
   {
     id: 'WQ-AL-9062',
@@ -190,6 +249,17 @@ const alerts: AlertRow[] = [
     related: 5,
     runbook: 'Storage retry investigation',
     signal: 'retry rate 6.7%',
+    priority: 'P3',
+    team: 'Platform Reliability',
+    region: 'Global',
+    environment: 'Production',
+    source: 'Splunk',
+    policy: 'HPC storage core',
+    opened: '09:07',
+    lastSeen: '09:45',
+    repeatCount: 11,
+    dedupeKey: 'gpfs:metadata:retry',
+    sla: '1h 18m to review',
   },
   {
     id: 'WQ-AL-9058',
@@ -203,6 +273,17 @@ const alerts: AlertRow[] = [
     related: 2,
     runbook: 'Vendor anomaly checklist',
     signal: 'z-score 3.8',
+    priority: 'P4',
+    team: 'Data Operations',
+    region: 'APAC',
+    environment: 'Production',
+    source: 'Data quality job',
+    policy: 'Vendor quality',
+    opened: '08:54',
+    lastSeen: '09:36',
+    repeatCount: 2,
+    dedupeKey: 'vendor:apac:quality:zscore',
+    sla: 'No escalation',
   },
   {
     id: 'WQ-AL-9051',
@@ -216,6 +297,17 @@ const alerts: AlertRow[] = [
     related: 1,
     runbook: 'Deploy health rollback',
     signal: '3/8 pods unhealthy',
+    priority: 'P3',
+    team: 'Research Platform',
+    region: 'Global',
+    environment: 'Staging',
+    source: 'Deploy checks',
+    policy: 'Non-prod deploy',
+    opened: '07:49',
+    lastSeen: '08:12',
+    repeatCount: 3,
+    dedupeKey: 'research-api-staging:health',
+    sla: 'Silenced',
   },
 ]
 
@@ -252,42 +344,70 @@ const incidents: Incident[] = [
   },
 ]
 
-const serviceRows = [
+const serviceRows: ServiceRow[] = [
   {
     service: 'md-ingest-equities-us',
+    name: 'Market data ingestion',
     owner: 'Market Data Platform',
     health: 'At risk',
     alerts: 12,
     slo: 82,
     noise: '18%',
     tier: 'Tier 0',
+    region: 'US',
+    timezone: 'America/New_York',
+    coverage: '24x7 primary + secondary',
+    dependencyRisk: 'Vendor feed delayed',
+    runbooks: '4 active, 1 missing',
+    lastIncident: 'WQ-INC-4819',
   },
   {
     service: 'brain-sim-cluster',
+    name: 'Research simulation cluster',
     owner: 'Research Platform',
     health: 'Degraded',
     alerts: 6,
     slo: 91,
     noise: '9%',
     tier: 'Tier 1',
+    region: 'Global',
+    timezone: 'UTC',
+    coverage: 'Follow-the-sun',
+    dependencyRisk: 'Worker saturation',
+    runbooks: '6 active',
+    lastIncident: 'WQ-INC-4818',
   },
   {
     service: 'hpc-storage-core',
+    name: 'HPC storage core',
     owner: 'Platform Reliability',
     health: 'Watch',
     alerts: 9,
     slo: 94,
     noise: '21%',
     tier: 'Tier 0',
+    region: 'Global',
+    timezone: 'UTC',
+    coverage: 'Platform primary + storage SME',
+    dependencyRisk: 'Metadata retries',
+    runbooks: '5 active',
+    lastIncident: 'WQ-INC-4804',
   },
   {
     service: 'vendor-normalizer-apac',
+    name: 'APAC vendor normalizer',
     owner: 'Data Operations',
     health: 'Healthy',
     alerts: 3,
     slo: 98,
     noise: '5%',
     tier: 'Tier 2',
+    region: 'APAC',
+    timezone: 'Asia/Singapore',
+    coverage: 'APAC business hours',
+    dependencyRisk: 'Vendor quality variance',
+    runbooks: '3 active',
+    lastIncident: 'WQ-INC-4815',
   },
 ]
 
@@ -322,11 +442,73 @@ const timelineEvents = [
   },
 ]
 
+const incidentDataSources = [
+  'Alert automation writes fired, acknowledged, assigned, escalated and resolved events.',
+  'Responders submit decisions, evidence links and handoff notes from this room.',
+  'Correlation suggestions come from alert clusters, recent deploys, runbooks and past incidents.',
+]
+
 const onCallShifts = [
   { person: 'Trang Pham', role: 'Primary', region: 'APAC', time: '08:00-16:00', load: 7 },
   { person: 'Leon Wu', role: 'Secondary', region: 'APAC', time: '08:00-16:00', load: 3 },
   { person: 'Maya Chen', role: 'Commander', region: 'US', time: '20:00-04:00', load: 2 },
 ]
+
+const onCallScheduleRows = [
+  {
+    team: 'Market Data Platform',
+    timezone: 'Asia/Singapore (UTC+8)',
+    shifts: [
+      { person: 'Trang Pham', role: 'Primary', start: 0, duration: 4, load: 7, tone: 'critical' },
+      { person: 'Leon Wu', role: 'Secondary', start: 0, duration: 4, load: 3, tone: 'info' },
+      { person: 'Maya Chen', role: 'Commander', start: 4, duration: 3, load: 2, tone: 'success' },
+      { person: 'Iris Tan', role: 'Primary', start: 7, duration: 5, load: 4, tone: 'info' },
+      { person: 'Noah Singh', role: 'Secondary', start: 12, duration: 5, load: 5, tone: 'warning' },
+      { person: 'Trang Pham', role: 'Primary', start: 18, duration: 5, load: 6, tone: 'critical' },
+      { person: 'Leon Wu', role: 'Secondary', start: 23, duration: 7, load: 3, tone: 'info' },
+    ],
+  },
+  {
+    team: 'Research Platform',
+    timezone: 'Europe/London (UTC+1)',
+    shifts: [
+      { person: 'Noah Singh', role: 'Primary', start: 0, duration: 3, load: 2, tone: 'success' },
+      { person: 'Priya Rao', role: 'Secondary', start: 0, duration: 3, load: 3, tone: 'info' },
+      { person: 'Ken Mori', role: 'Primary', start: 3, duration: 4, load: 5, tone: 'warning' },
+      { person: 'Maya Chen', role: 'Commander', start: 7, duration: 7, load: 2, tone: 'success' },
+      { person: 'Priya Rao', role: 'Primary', start: 14, duration: 7, load: 4, tone: 'info' },
+      { person: 'Ken Mori', role: 'Secondary', start: 21, duration: 9, load: 5, tone: 'warning' },
+    ],
+  },
+  {
+    team: 'Platform Reliability',
+    timezone: 'America/New_York (UTC-4)',
+    shifts: [
+      { person: 'Hana Lee', role: 'Storage SME', start: 0, duration: 2, load: 4, tone: 'info' },
+      { person: 'Minh Tran', role: 'Primary', start: 2, duration: 5, load: 6, tone: 'warning' },
+      { person: 'Iris Tan', role: 'Secondary', start: 2, duration: 5, load: 3, tone: 'info' },
+      { person: 'Hana Lee', role: 'Primary', start: 7, duration: 7, load: 4, tone: 'success' },
+      { person: 'Minh Tran', role: 'Primary', start: 14, duration: 7, load: 5, tone: 'warning' },
+      { person: 'Iris Tan', role: 'Secondary', start: 21, duration: 9, load: 2, tone: 'info' },
+    ],
+  },
+]
+
+const onCallViewOptions: { value: OnCallView; label: string }[] = [
+  { value: 'day', label: '1 day' },
+  { value: 'week', label: '1 week' },
+  { value: 'two-weeks', label: '2 weeks' },
+  { value: 'month', label: '1 month' },
+]
+
+const onCallViewDays: Record<OnCallView, number> = {
+  day: 1,
+  week: 7,
+  'two-weeks': 14,
+  month: 30,
+}
+
+const baseScheduleDate = new Date(2026, 6, 10)
 
 const silences = [
   {
@@ -361,15 +543,9 @@ function App() {
 
 function Workspace() {
   const [activeScreen, setActiveScreen] = useState<ScreenId>(() => screenFromHash())
-  const [selectedAlertId, setSelectedAlertId] = useState(alerts[0].id)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { colorScheme, setColorScheme } = useMantineColorScheme()
   const computedColorScheme = useComputedColorScheme('dark')
-
-  const selectedAlert = useMemo(
-    () => alerts.find((alert) => alert.id === selectedAlertId) ?? alerts[0],
-    [selectedAlertId],
-  )
 
   const activeNavItem = navItems.find((item) => item.id === activeScreen) ?? navItems[0]
 
@@ -543,27 +719,23 @@ function Workspace() {
             title={screenTitle(activeScreen)}
             description={screenDescription(activeScreen)}
           />
-          {renderScreen(activeScreen, selectedAlert, setSelectedAlertId)}
+          {renderScreen(activeScreen)}
         </main>
       </div>
     </div>
   )
 }
 
-function renderScreen(
-  activeScreen: ScreenId,
-  selectedAlert: AlertRow,
-  setSelectedAlertId: (id: string) => void,
-) {
+function renderScreen(activeScreen: ScreenId) {
   switch (activeScreen) {
     case 'dashboard':
       return <OperationsDashboard />
     case 'queue':
-      return <AlertQueue selectedAlert={selectedAlert} setSelectedAlertId={setSelectedAlertId} />
+      return <AlertQueue />
     case 'incident':
       return <IncidentRoom />
     case 'services':
-      return <ServiceDetail />
+      return <ServicesScreen />
     case 'oncall':
       return <OnCallEscalation />
     case 'silences':
@@ -583,20 +755,12 @@ function OperationsDashboard() {
       <MetricCard label="Unowned alerts" value="6" tone="warning" detail="Needs routing" />
       <MetricCard label="Noise ratio" value="18%" tone="info" detail="Down 4% vs 7d" />
 
-      <Panel title="Active critical path" icon={IconFlame} className="span-7">
-        <div className="alert-stack">
-          {alerts.slice(0, 4).map((alert) => (
-            <AlertSummary key={alert.id} alert={alert} />
-          ))}
-        </div>
+      <Panel title="Active critical path" icon={IconFlame} className="span-12">
+        <ActiveCriticalPathTable />
       </Panel>
 
-      <Panel title="Live incidents" icon={IconTimeline} className="span-5">
-        <div className="incident-list">
-          {incidents.map((incident) => (
-            <IncidentCard key={incident.id} incident={incident} />
-          ))}
-        </div>
+      <Panel title="Live incidents" icon={IconTimeline} className="span-12">
+        <LiveIncidentsTable />
       </Panel>
 
       <Panel title="Service risk" icon={IconServer} className="span-7">
@@ -628,91 +792,298 @@ function OperationsDashboard() {
   )
 }
 
-function AlertQueue({
-  selectedAlert,
-  setSelectedAlertId,
-}: {
-  selectedAlert: AlertRow
-  setSelectedAlertId: (id: string) => void
-}) {
+function ActiveCriticalPathTable() {
   return (
-    <div className="queue-layout">
-      <Panel title="Alert Queue" icon={IconBellRinging} className="queue-table-panel">
-        <div className="table-toolbar">
-          <TextInput
-            leftSection={<IconSearch size={16} />}
-            placeholder="Search service, alert ID, trace ID"
-            className="control"
-          />
-          <Select
-            leftSection={<IconFilter size={16} />}
-            placeholder="Severity"
-            defaultValue="needs-action"
-            data={[
-              { value: 'needs-action', label: 'Needs action' },
-              { value: 'critical', label: 'Critical' },
-              { value: 'mine', label: 'Assigned to me' },
-              { value: 'flapping', label: 'Flapping' },
-            ]}
-            className="control"
-          />
-          <SegmentedControl data={['Mine', 'Team', 'All']} defaultValue="Team" className="control" />
-        </div>
+    <Table.ScrollContainer minWidth={1100} className="table-wrap">
+      <Table className="ops-table" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Priority</Table.Th>
+            <Table.Th>Alert</Table.Th>
+            <Table.Th>Service</Table.Th>
+            <Table.Th>Signal</Table.Th>
+            <Table.Th>Owner</Table.Th>
+            <Table.Th>Age</Table.Th>
+            <Table.Th>Escalation</Table.Th>
+            <Table.Th>SLA</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {alerts.slice(0, 4).map((alert) => (
+            <Table.Tr key={alert.id}>
+              <Table.Td>
+                <Badge className={alert.priority === 'P1' ? 'chip-critical' : 'chip-warning'}>
+                  {alert.priority}
+                </Badge>
+              </Table.Td>
+              <Table.Td>
+                <div className={`severity-title severity-${alert.severity}`}>
+                  <span />
+                  <div>
+                    <strong>{alert.title}</strong>
+                    <small>{alert.id}</small>
+                  </div>
+                </div>
+              </Table.Td>
+              <Table.Td>
+                <Code>{alert.service}</Code>
+              </Table.Td>
+              <Table.Td>{alert.signal}</Table.Td>
+              <Table.Td>{alert.owner}</Table.Td>
+              <Table.Td>{alert.age}</Table.Td>
+              <Table.Td>{alert.policy}</Table.Td>
+              <Table.Td>{alert.sla}</Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
+  )
+}
 
-        <Table.ScrollContainer minWidth={980} className="table-wrap">
-          <Table className="ops-table" verticalSpacing="sm">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Alert</Table.Th>
-                <Table.Th>Service</Table.Th>
-                <Table.Th>State</Table.Th>
-                <Table.Th>Owner</Table.Th>
-                <Table.Th>Age</Table.Th>
-                <Table.Th>Impact</Table.Th>
-                <Table.Th>Related</Table.Th>
-                <Table.Th>Action</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {alerts.map((alert) => (
-                <Table.Tr
-                  key={alert.id}
-                  className={alert.id === selectedAlert.id ? 'selected-row' : undefined}
-                  onClick={() => setSelectedAlertId(alert.id)}
-                >
-                  <Table.Td>
-                    <div className={`severity-title severity-${alert.severity}`}>
-                      <span />
-                      <div>
-                        <strong>{alert.title}</strong>
-                        <small>{alert.id}</small>
-                      </div>
-                    </div>
-                  </Table.Td>
-                  <Table.Td>
-                    <Code>{alert.service}</Code>
-                  </Table.Td>
-                  <Table.Td>
-                    <StatusBadge state={alert.state} />
-                  </Table.Td>
-                  <Table.Td>{alert.owner}</Table.Td>
-                  <Table.Td>{alert.age}</Table.Td>
-                  <Table.Td>{alert.impact}</Table.Td>
-                  <Table.Td>{alert.related}</Table.Td>
-                  <Table.Td>
-                    <Button size="xs" className="btn-outline">
-                      Triage
-                    </Button>
-                  </Table.Td>
+function LiveIncidentsTable() {
+  return (
+    <Table.ScrollContainer minWidth={1000} className="table-wrap">
+      <Table className="ops-table" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Incident</Table.Th>
+            <Table.Th>Severity</Table.Th>
+            <Table.Th>Status</Table.Th>
+            <Table.Th>Commander</Table.Th>
+            <Table.Th>Age</Table.Th>
+            <Table.Th>Impact</Table.Th>
+            <Table.Th>Responders</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {incidents.map((incident) => (
+            <Table.Tr key={incident.id}>
+              <Table.Td>
+                <div className={`severity-title severity-${incident.severity}`}>
+                  <span />
+                  <div>
+                    <strong>{incident.title}</strong>
+                    <small>{incident.id}</small>
+                  </div>
+                </div>
+              </Table.Td>
+              <Table.Td>
+                <SeverityPill severity={incident.severity} />
+              </Table.Td>
+              <Table.Td>
+                <Badge className="chip-info">{incident.state}</Badge>
+              </Table.Td>
+              <Table.Td>{incident.commander}</Table.Td>
+              <Table.Td>{incident.age}</Table.Td>
+              <Table.Td>{incident.impact}</Table.Td>
+              <Table.Td>
+                <Avatar.Group spacing="sm">
+                  {incident.responders.map((person) => (
+                    <Avatar key={person} radius="xl" color="wqGreen" size="sm">
+                      {person[0]}
+                    </Avatar>
+                  ))}
+                </Avatar.Group>
+              </Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
+  )
+}
+
+function AlertQueue() {
+  const [query, setQuery] = useState('')
+  const [severityFilter, setSeverityFilter] = useState('all')
+  const [stateFilter, setStateFilter] = useState('active')
+  const [teamFilter, setTeamFilter] = useState('all')
+  const [environmentFilter, setEnvironmentFilter] = useState('all')
+  const [modalAlertId, setModalAlertId] = useState<string | null>(null)
+
+  const filteredAlerts = useMemo(
+    () =>
+      alerts.filter((alert) => {
+        const normalizedQuery = query.trim().toLowerCase()
+        const matchesQuery =
+          !normalizedQuery ||
+          [alert.id, alert.title, alert.service, alert.signal, alert.dedupeKey, alert.runbook]
+            .join(' ')
+            .toLowerCase()
+            .includes(normalizedQuery)
+
+        const matchesSeverity = severityFilter === 'all' || alert.severity === severityFilter
+        const matchesState =
+          stateFilter === 'all' ||
+          (stateFilter === 'active'
+            ? alert.state !== 'Resolved' && alert.state !== 'Silenced'
+            : alert.state === stateFilter)
+        const matchesTeam = teamFilter === 'all' || alert.team === teamFilter
+        const matchesEnvironment =
+          environmentFilter === 'all' || alert.environment === environmentFilter
+
+        return (
+          matchesQuery && matchesSeverity && matchesState && matchesTeam && matchesEnvironment
+        )
+      }),
+    [environmentFilter, query, severityFilter, stateFilter, teamFilter],
+  )
+
+  const modalAlert = alerts.find((alert) => alert.id === modalAlertId) ?? null
+
+  return (
+    <>
+      <div className="queue-layout">
+        <Panel title="Alert Queue" icon={IconBellRinging} className="queue-table-panel">
+          <div className="queue-filter-toolbar">
+            <TextInput
+              leftSection={<IconSearch size={16} />}
+              placeholder="Search alert, service, runbook, dedupe key"
+              className="control"
+              value={query}
+              onChange={(event) => setQuery(event.currentTarget.value)}
+            />
+            <Select
+              leftSection={<IconFilter size={16} />}
+              label="Severity"
+              value={severityFilter}
+              onChange={(value) => setSeverityFilter(value ?? 'all')}
+              data={[
+                { value: 'all', label: 'All severities' },
+                { value: 'critical', label: 'Critical' },
+                { value: 'high', label: 'High' },
+                { value: 'warning', label: 'Warning' },
+                { value: 'info', label: 'Info' },
+              ]}
+              className="control"
+            />
+            <Select
+              label="State"
+              value={stateFilter}
+              onChange={(value) => setStateFilter(value ?? 'active')}
+              data={[
+                { value: 'active', label: 'Needs action' },
+                { value: 'all', label: 'All states' },
+                { value: 'Firing', label: 'Firing' },
+                { value: 'Acked', label: 'Acknowledged' },
+                { value: 'Assigned', label: 'Assigned' },
+                { value: 'Silenced', label: 'Silenced' },
+              ]}
+              className="control"
+            />
+            <Select
+              label="Team"
+              value={teamFilter}
+              onChange={(value) => setTeamFilter(value ?? 'all')}
+              data={[
+                { value: 'all', label: 'All teams' },
+                { value: 'Market Data Platform', label: 'Market Data Platform' },
+                { value: 'Research Platform', label: 'Research Platform' },
+                { value: 'Platform Reliability', label: 'Platform Reliability' },
+                { value: 'Data Operations', label: 'Data Operations' },
+              ]}
+              className="control"
+            />
+            <Select
+              label="Environment"
+              value={environmentFilter}
+              onChange={(value) => setEnvironmentFilter(value ?? 'all')}
+              data={[
+                { value: 'all', label: 'All environments' },
+                { value: 'Production', label: 'Production' },
+                { value: 'Staging', label: 'Staging' },
+              ]}
+              className="control"
+            />
+            <SegmentedControl
+              data={['Mine', 'Team', 'All']}
+              defaultValue="Team"
+              className="control scope-control"
+            />
+          </div>
+
+          <Table.ScrollContainer minWidth={1420} className="table-wrap">
+            <Table className="ops-table" verticalSpacing="sm">
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Priority</Table.Th>
+                  <Table.Th>Alert</Table.Th>
+                  <Table.Th>Service</Table.Th>
+                  <Table.Th>Status</Table.Th>
+                  <Table.Th>Team</Table.Th>
+                  <Table.Th>Region</Table.Th>
+                  <Table.Th>Source</Table.Th>
+                  <Table.Th>Signal</Table.Th>
+                  <Table.Th>Opened</Table.Th>
+                  <Table.Th>Last seen</Table.Th>
+                  <Table.Th>Repeats</Table.Th>
+                  <Table.Th>SLA</Table.Th>
+                  <Table.Th>Action</Table.Th>
                 </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </Table.ScrollContainer>
-      </Panel>
+              </Table.Thead>
+              <Table.Tbody>
+                {filteredAlerts.map((alert) => (
+                  <Table.Tr key={alert.id} onClick={() => setModalAlertId(alert.id)}>
+                    <Table.Td>
+                      <Badge className={alert.priority === 'P1' ? 'chip-critical' : 'chip-info'}>
+                        {alert.priority}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <div className={`severity-title severity-${alert.severity}`}>
+                        <span />
+                        <div>
+                          <strong>{alert.title}</strong>
+                          <small>{alert.id}</small>
+                        </div>
+                      </div>
+                    </Table.Td>
+                    <Table.Td>
+                      <Code>{alert.service}</Code>
+                    </Table.Td>
+                    <Table.Td>
+                      <StatusBadge state={alert.state} />
+                    </Table.Td>
+                    <Table.Td>{alert.team}</Table.Td>
+                    <Table.Td>{alert.region}</Table.Td>
+                    <Table.Td>{alert.source}</Table.Td>
+                    <Table.Td>{alert.signal}</Table.Td>
+                    <Table.Td>{alert.opened}</Table.Td>
+                    <Table.Td>{alert.lastSeen}</Table.Td>
+                    <Table.Td>{alert.repeatCount}</Table.Td>
+                    <Table.Td>{alert.sla}</Table.Td>
+                    <Table.Td>
+                      <Button
+                        size="xs"
+                        className="btn-outline"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          setModalAlertId(alert.id)
+                        }}
+                      >
+                        Inspect
+                      </Button>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        </Panel>
+      </div>
 
-      <AlertInspector alert={selectedAlert} />
-    </div>
+      <Modal
+        opened={Boolean(modalAlert)}
+        onClose={() => setModalAlertId(null)}
+        title={modalAlert ? `${modalAlert.id} · Alert Inspector` : 'Alert Inspector'}
+        size="xl"
+        centered
+        className="detail-modal"
+      >
+        {modalAlert ? <AlertInspector alert={modalAlert} /> : null}
+      </Modal>
+    </>
   )
 }
 
@@ -739,8 +1110,12 @@ function AlertInspector({ alert }: { alert: AlertRow }) {
 
       <div className="metadata-grid">
         <Meta label="Service" value={alert.service} code />
+        <Meta label="Team" value={alert.team} />
+        <Meta label="Environment" value={alert.environment} />
         <Meta label="Signal" value={alert.signal} />
+        <Meta label="Policy" value={alert.policy} />
         <Meta label="Runbook" value={alert.runbook} />
+        <Meta label="Dedupe key" value={alert.dedupeKey} code />
         <Meta label="Related" value={`${alert.related} correlated alerts`} />
       </div>
 
@@ -774,6 +1149,24 @@ function IncidentRoom() {
             ),
           )}
         </div>
+        <div className="war-room-card">
+          <div>
+            <IconUsersGroup size={18} />
+            <div>
+              <strong>War Room Meeting</strong>
+              <a href="https://meet.worldquant.example/wq-inc-4819">meet.worldquant.example/wq-inc-4819</a>
+            </div>
+          </div>
+          <Button
+            className="btn-primary"
+            size="sm"
+            leftSection={<IconExternalLink size={16} />}
+            component="a"
+            href="https://meet.worldquant.example/wq-inc-4819"
+          >
+            Join now
+          </Button>
+        </div>
       </Panel>
 
       <Panel title="Decision timeline" icon={IconTimeline} className="incident-main">
@@ -795,6 +1188,34 @@ function IncidentRoom() {
             )
           })}
         </Timeline>
+
+        <Divider className="soft-divider" />
+
+        <div className="incident-entry-grid">
+          <div className="incident-entry-card">
+            <strong>Submit decision</strong>
+            <Textarea
+              className="control"
+              minRows={3}
+              placeholder="Decision, rationale, owner, expected next check"
+            />
+            <Button className="btn-primary" size="sm" leftSection={<IconSend size={16} />}>
+              Submit decision
+            </Button>
+          </div>
+          <div className="incident-entry-card">
+            <strong>Add evidence</strong>
+            <TextInput className="control" placeholder="Dashboard or log URL" />
+            <Textarea
+              className="control"
+              minRows={2}
+              placeholder="Evidence summary"
+            />
+            <Button className="btn-outline" size="sm" leftSection={<IconPlus size={16} />}>
+              Add evidence
+            </Button>
+          </div>
+        </div>
 
         <Divider className="soft-divider" />
 
@@ -820,78 +1241,338 @@ function IncidentRoom() {
           <Evidence label="Recent deploy" value="No matching deploy in 6h" />
           <Evidence label="Similar incident" value="WQ-INC-4821, 91% match" />
         </div>
+        <div className="source-list">
+          <strong>Data sources</strong>
+          {incidentDataSources.map((source) => (
+            <span key={source}>{source}</span>
+          ))}
+        </div>
       </Panel>
     </div>
   )
 }
 
-function ServiceDetail() {
+function ServicesScreen() {
+  const [query, setQuery] = useState('')
+  const [healthFilter, setHealthFilter] = useState('all')
+  const [tierFilter, setTierFilter] = useState('all')
+  const [ownerFilter, setOwnerFilter] = useState('all')
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null)
+
+  const selectedService = serviceRows.find((service) => service.service === selectedServiceId)
+  const filteredServices = useMemo(
+    () =>
+      serviceRows.filter((service) => {
+        const normalizedQuery = query.trim().toLowerCase()
+        const matchesQuery =
+          !normalizedQuery ||
+          [service.service, service.name, service.owner, service.dependencyRisk]
+            .join(' ')
+            .toLowerCase()
+            .includes(normalizedQuery)
+        const matchesHealth = healthFilter === 'all' || service.health === healthFilter
+        const matchesTier = tierFilter === 'all' || service.tier === tierFilter
+        const matchesOwner = ownerFilter === 'all' || service.owner === ownerFilter
+
+        return matchesQuery && matchesHealth && matchesTier && matchesOwner
+      }),
+    [healthFilter, ownerFilter, query, tierFilter],
+  )
+
+  if (selectedService) {
+    return <ServiceDetail service={selectedService} onBack={() => setSelectedServiceId(null)} />
+  }
+
   return (
     <div className="screen-grid">
-      <Panel title="Service profile" icon={IconServer} className="span-4">
-        <div className="profile-block">
-          <Code>md-ingest-equities-us</Code>
-          <h3>Market data ingestion</h3>
-          <p>Tier 0 data freshness service owned by Market Data Platform.</p>
+      <Panel title="Service directory" icon={IconServer} className="span-12">
+        <div className="queue-filter-toolbar service-filter-toolbar">
+          <TextInput
+            leftSection={<IconSearch size={16} />}
+            placeholder="Search service, owner, dependency"
+            className="control"
+            value={query}
+            onChange={(event) => setQuery(event.currentTarget.value)}
+          />
+          <Select
+            label="Health"
+            value={healthFilter}
+            onChange={(value) => setHealthFilter(value ?? 'all')}
+            data={[
+              { value: 'all', label: 'All health states' },
+              { value: 'At risk', label: 'At risk' },
+              { value: 'Degraded', label: 'Degraded' },
+              { value: 'Watch', label: 'Watch' },
+              { value: 'Healthy', label: 'Healthy' },
+            ]}
+            className="control"
+          />
+          <Select
+            label="Tier"
+            value={tierFilter}
+            onChange={(value) => setTierFilter(value ?? 'all')}
+            data={[
+              { value: 'all', label: 'All tiers' },
+              { value: 'Tier 0', label: 'Tier 0' },
+              { value: 'Tier 1', label: 'Tier 1' },
+              { value: 'Tier 2', label: 'Tier 2' },
+            ]}
+            className="control"
+          />
+          <Select
+            label="Owner"
+            value={ownerFilter}
+            onChange={(value) => setOwnerFilter(value ?? 'all')}
+            data={[
+              { value: 'all', label: 'All owners' },
+              { value: 'Market Data Platform', label: 'Market Data Platform' },
+              { value: 'Research Platform', label: 'Research Platform' },
+              { value: 'Platform Reliability', label: 'Platform Reliability' },
+              { value: 'Data Operations', label: 'Data Operations' },
+            ]}
+            className="control"
+          />
         </div>
-        <div className="metadata-grid single">
-          <Meta label="Owner" value="Market Data Platform" />
-          <Meta label="Escalation" value="Primary -> Secondary -> Data lead" />
-          <Meta label="Runbooks" value="4 active, 1 missing" />
-        </div>
-      </Panel>
 
-      <Panel title="Reliability overview" icon={IconChartBar} className="span-8">
-        <div className="service-metric-row">
-          <MetricCard label="Open alerts" value="12" tone="critical" detail="3 critical" />
-          <MetricCard label="SLO burn" value="82%" tone="warning" detail="Last 4h" />
-          <MetricCard label="Duplicate ratio" value="18%" tone="info" detail="Down 4%" />
-        </div>
+        <Table.ScrollContainer minWidth={1100} className="table-wrap">
+          <Table className="ops-table" verticalSpacing="sm">
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Service</Table.Th>
+                <Table.Th>Owner</Table.Th>
+                <Table.Th>Tier</Table.Th>
+                <Table.Th>Health</Table.Th>
+                <Table.Th>Open alerts</Table.Th>
+                <Table.Th>SLO</Table.Th>
+                <Table.Th>Noise</Table.Th>
+                <Table.Th>Region</Table.Th>
+                <Table.Th>Coverage</Table.Th>
+                <Table.Th>Dependency risk</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {filteredServices.map((service) => (
+                <Table.Tr key={service.service} onClick={() => setSelectedServiceId(service.service)}>
+                  <Table.Td>
+                    <div>
+                      <strong>{service.name}</strong>
+                      <small>
+                        <Code>{service.service}</Code>
+                      </small>
+                    </div>
+                  </Table.Td>
+                  <Table.Td>{service.owner}</Table.Td>
+                  <Table.Td>{service.tier}</Table.Td>
+                  <Table.Td>
+                    <Badge className={service.health === 'Healthy' ? 'chip-success' : 'chip-warning'}>
+                      {service.health}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>{service.alerts}</Table.Td>
+                  <Table.Td>{service.slo}%</Table.Td>
+                  <Table.Td>{service.noise}</Table.Td>
+                  <Table.Td>{service.region}</Table.Td>
+                  <Table.Td>{service.coverage}</Table.Td>
+                  <Table.Td>{service.dependencyRisk}</Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </Table.ScrollContainer>
       </Panel>
+    </div>
+  )
+}
 
-      <Panel title="Service workspace" icon={IconDatabase} className="span-12">
-        <Tabs defaultValue="alerts" className="wq-tabs">
-          <Tabs.List>
-            <Tabs.Tab value="alerts">Active Alerts</Tabs.Tab>
-            <Tabs.Tab value="history">History</Tabs.Tab>
-            <Tabs.Tab value="deps">Dependencies</Tabs.Tab>
-            <Tabs.Tab value="rules">Rules</Tabs.Tab>
-          </Tabs.List>
-          <Tabs.Panel value="alerts">
-            <CompactTable />
-          </Tabs.Panel>
-          <Tabs.Panel value="history">
-            <div className="history-grid">
-              <QualityMetric label="MTTA 7d" value={84} />
-              <QualityMetric label="Runbook helpful" value={72} />
-              <QualityMetric label="Action items closed" value={58} />
-            </div>
-          </Tabs.Panel>
-          <Tabs.Panel value="deps">
-            <div className="dependency-grid">
-              {['vendor-feed-us', 'normalizer-core', 'research-cache', 'hpc-storage-core'].map(
-                (dependency) => (
-                  <div key={dependency} className="dependency-node">
-                    <IconGitBranch size={16} />
-                    <span>{dependency}</span>
-                  </div>
-                ),
-              )}
-            </div>
-          </Tabs.Panel>
-          <Tabs.Panel value="rules">
-            <RuleRecommendations />
-          </Tabs.Panel>
-        </Tabs>
-      </Panel>
+function ServiceDetail({
+  service,
+  onBack,
+}: {
+  service: ServiceRow
+  onBack: () => void
+}) {
+  return (
+    <div className="service-detail-view">
+      <div className="detail-subheader">
+        <Button className="btn-outline" leftSection={<IconArrowLeft size={16} />} onClick={onBack}>
+          Services
+        </Button>
+        <div>
+          <Code>{service.service}</Code>
+          <h2>{service.name}</h2>
+          <p>
+            {service.tier} service owned by {service.owner}. Coverage: {service.coverage}.
+          </p>
+        </div>
+      </div>
+
+      <div className="screen-grid">
+        <Panel title="Service profile" icon={IconServer} className="span-4">
+          <div className="profile-block">
+            <Code>{service.service}</Code>
+            <h3>{service.name}</h3>
+            <p>{service.dependencyRisk}</p>
+          </div>
+          <div className="metadata-grid single">
+            <Meta label="Owner" value={service.owner} />
+            <Meta label="Timezone" value={service.timezone} />
+            <Meta label="Escalation" value={service.coverage} />
+            <Meta label="Runbooks" value={service.runbooks} />
+            <Meta label="Last incident" value={service.lastIncident} />
+          </div>
+        </Panel>
+
+        <Panel title="Reliability overview" icon={IconChartBar} className="span-8">
+          <div className="service-metric-row">
+            <MetricCard
+              label="Open alerts"
+              value={`${service.alerts}`}
+              tone={service.alerts > 8 ? 'critical' : 'warning'}
+              detail={`${service.region} coverage`}
+            />
+            <MetricCard
+              label="SLO burn"
+              value={`${service.slo}%`}
+              tone={service.slo > 95 ? 'success' : 'warning'}
+              detail="Last 4h"
+            />
+            <MetricCard label="Duplicate ratio" value={service.noise} tone="info" detail="Down 4%" />
+          </div>
+        </Panel>
+
+        <Panel title="Service workspace" icon={IconDatabase} className="span-12">
+          <Tabs defaultValue="alerts" className="wq-tabs">
+            <Tabs.List>
+              <Tabs.Tab value="alerts">Active Alerts</Tabs.Tab>
+              <Tabs.Tab value="history">History</Tabs.Tab>
+              <Tabs.Tab value="deps">Dependencies</Tabs.Tab>
+              <Tabs.Tab value="rules">Rules</Tabs.Tab>
+            </Tabs.List>
+            <Tabs.Panel value="alerts">
+              <CompactTable serviceName={service.service} />
+            </Tabs.Panel>
+            <Tabs.Panel value="history">
+              <div className="history-grid">
+                <QualityMetric label="MTTA 7d" value={84} />
+                <QualityMetric label="Runbook helpful" value={72} />
+                <QualityMetric label="Action items closed" value={58} />
+              </div>
+            </Tabs.Panel>
+            <Tabs.Panel value="deps">
+              <div className="dependency-grid">
+                {['vendor-feed-us', 'normalizer-core', 'research-cache', 'hpc-storage-core'].map(
+                  (dependency) => (
+                    <div key={dependency} className="dependency-node">
+                      <IconGitBranch size={16} />
+                      <span>{dependency}</span>
+                    </div>
+                  ),
+                )}
+              </div>
+            </Tabs.Panel>
+            <Tabs.Panel value="rules">
+              <RuleRecommendations />
+            </Tabs.Panel>
+          </Tabs>
+        </Panel>
+      </div>
     </div>
   )
 }
 
 function OnCallEscalation() {
+  const [scheduleView, setScheduleView] = useState<OnCallView>('week')
+  const [rangeOffset, setRangeOffset] = useState(0)
+  const dayCount = onCallViewDays[scheduleView]
+  const rangeStart = addDays(baseScheduleDate, rangeOffset * dayCount)
+  const rangeEnd = addDays(rangeStart, dayCount - 1)
+  const scheduleDays = Array.from({ length: dayCount }, (_, index) => addDays(rangeStart, index))
+
   return (
-    <div className="screen-grid">
-      <Panel title="Current coverage" icon={IconCalendarTime} className="span-5">
+    <div className="screen-grid oncall-grid">
+      <Panel title="Schedule timeline" icon={IconTimeline} className="span-12 schedule-timeline-panel">
+        <div className="schedule-toolbar">
+          <div>
+            <strong>{formatScheduleRange(rangeStart, rangeEnd, dayCount)}</strong>
+            <span>Coverage by team, responder and schedule timezone</span>
+          </div>
+          <div className="schedule-controls">
+            <Tooltip label="Previous range">
+              <ActionIcon
+                variant="subtle"
+                className="icon-button"
+                aria-label="Previous schedule range"
+                onClick={() => setRangeOffset((offset) => offset - 1)}
+              >
+                <IconChevronLeft size={18} />
+              </ActionIcon>
+            </Tooltip>
+            <SegmentedControl
+              value={scheduleView}
+              onChange={(value) => {
+                setScheduleView(value as OnCallView)
+                setRangeOffset(0)
+              }}
+              data={onCallViewOptions}
+              className="control schedule-view-control"
+            />
+            <Tooltip label="Next range">
+              <ActionIcon
+                variant="subtle"
+                className="icon-button"
+                aria-label="Next schedule range"
+                onClick={() => setRangeOffset((offset) => offset + 1)}
+              >
+                <IconChevronRight size={18} />
+              </ActionIcon>
+            </Tooltip>
+          </div>
+        </div>
+
+        <div
+          className="schedule-calendar"
+          style={{ '--schedule-days': dayCount } as CSSProperties}
+        >
+          <div className="schedule-calendar-grid">
+            <div className="schedule-day-header">
+              <span>Schedule</span>
+              {scheduleDays.map((day) => (
+                <div key={day.toISOString()}>
+                  <strong>{formatScheduleDay(day)}</strong>
+                  <span>{formatScheduleWeekday(day)}</span>
+                </div>
+              ))}
+            </div>
+
+            {onCallScheduleRows.map((schedule) => (
+              <div key={schedule.team} className="schedule-team-row">
+                <div className="schedule-team-label">
+                  <strong>{schedule.team}</strong>
+                  <span>{schedule.timezone}</span>
+                </div>
+                <div className="schedule-lanes">
+                  {schedule.shifts
+                    .filter((shift) => shift.start < dayCount)
+                    .map((shift) => (
+                      <div
+                        key={`${schedule.team}-${shift.person}-${shift.start}`}
+                        className={`schedule-shift shift-${shift.tone}`}
+                        style={scheduleShiftStyle(shift.start, shift.duration, dayCount)}
+                      >
+                        <strong>{shift.person}</strong>
+                        <span>
+                          {shift.role} · {shift.load} alerts
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Panel>
+
+      <Panel title="Current coverage" icon={IconCalendarTime} className="span-4">
         <div className="coverage-stack">
           {onCallShifts.map((shift) => (
             <div key={shift.person} className="coverage-row">
@@ -915,18 +1596,7 @@ function OnCallEscalation() {
         </div>
       </Panel>
 
-      <Panel title="Schedule timeline" icon={IconTimeline} className="span-7">
-        <div className="schedule-grid">
-          {['08:00', '12:00', '16:00', '20:00', '00:00', '04:00'].map((time, index) => (
-            <div key={time} className={index === 2 ? 'schedule-slot active' : 'schedule-slot'}>
-              <span>{time}</span>
-              <strong>{index < 3 ? 'APAC shift' : 'US shift'}</strong>
-            </div>
-          ))}
-        </div>
-      </Panel>
-
-      <Panel title="Escalation policies" icon={IconRoute} className="span-6">
+      <Panel title="Escalation policies" icon={IconRoute} className="span-4">
         <div className="policy-stack">
           {['Market data Tier 0', 'Research platform Tier 1', 'Vendor data quality'].map(
             (policy, index) => (
@@ -939,7 +1609,7 @@ function OnCallEscalation() {
         </div>
       </Panel>
 
-      <Panel title="Handoff queue" icon={IconClipboardCheck} className="span-6">
+      <Panel title="Handoff queue" icon={IconClipboardCheck} className="span-4">
         <div className="handoff-card">
           <strong>WQ-INC-4819 handoff due in 18m</strong>
           <p>Hypothesis: upstream vendor batch delay. Next action: validate recovered batches.</p>
@@ -1121,6 +1791,42 @@ function ResearchPlan() {
   )
 }
 
+function addDays(date: Date, days: number) {
+  const nextDate = new Date(date)
+  nextDate.setDate(nextDate.getDate() + days)
+  return nextDate
+}
+
+function formatScheduleDay(date: Date) {
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function formatScheduleWeekday(date: Date) {
+  return date.toLocaleDateString('en-US', { weekday: 'short' })
+}
+
+function formatScheduleRange(start: Date, end: Date, dayCount: number) {
+  if (dayCount === 1) {
+    return start.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  }
+
+  return `${formatScheduleDay(start)} - ${formatScheduleDay(end)}, ${end.getFullYear()}`
+}
+
+function scheduleShiftStyle(start: number, duration: number, dayCount: number): CSSProperties {
+  const columnStart = Math.max(1, start + 1)
+  const columnEnd = Math.min(dayCount + 1, start + duration + 1)
+
+  return {
+    gridColumn: `${columnStart} / ${Math.max(columnStart + 1, columnEnd)}`,
+  }
+}
+
 function ScreenTitle({
   eyebrow,
   title,
@@ -1136,14 +1842,6 @@ function ScreenTitle({
         <span>{eyebrow}</span>
         <h1>{title}</h1>
         <p>{description}</p>
-      </div>
-      <div className="screen-actions">
-        <Button className="btn-outline" leftSection={<IconHistory size={16} />}>
-          Last 24h
-        </Button>
-        <Button className="btn-primary" leftSection={<IconArrowRight size={16} />}>
-          Open command
-        </Button>
       </div>
     </section>
   )
@@ -1197,45 +1895,6 @@ function MetricCard({
       <strong>{value}</strong>
       <p>{detail}</p>
     </Paper>
-  )
-}
-
-function AlertSummary({ alert }: { alert: AlertRow }) {
-  return (
-    <div className={`alert-summary severity-${alert.severity}`}>
-      <div>
-        <SeverityPill severity={alert.severity} />
-        <strong>{alert.title}</strong>
-        <span>{alert.service}</span>
-      </div>
-      <div className="alert-summary-side">
-        <StatusBadge state={alert.state} />
-        <small>{alert.age}</small>
-      </div>
-    </div>
-  )
-}
-
-function IncidentCard({ incident }: { incident: Incident }) {
-  return (
-    <div className={`incident-card severity-${incident.severity}`}>
-      <div>
-        <SeverityPill severity={incident.severity} />
-        <strong>{incident.title}</strong>
-        <p>{incident.impact}</p>
-      </div>
-      <Group justify="space-between">
-        <span>{incident.commander}</span>
-        <Badge className="chip-info">{incident.state}</Badge>
-      </Group>
-      <Avatar.Group spacing="sm">
-        {incident.responders.map((person) => (
-          <Avatar key={person} radius="xl" color="wqGreen" size="sm">
-            {person[0]}
-          </Avatar>
-        ))}
-      </Avatar.Group>
-    </div>
   )
 }
 
@@ -1324,7 +1983,10 @@ function QualityMetric({ label, value }: { label: string; value: number }) {
   )
 }
 
-function CompactTable() {
+function CompactTable({ serviceName }: { serviceName?: string }) {
+  const rows = alerts.filter((alert) => !serviceName || alert.service === serviceName)
+  const tableRows = rows.length > 0 ? rows : alerts.slice(0, 4)
+
   return (
     <Table.ScrollContainer minWidth={760} className="table-wrap nested-table">
       <Table className="ops-table" verticalSpacing="sm">
@@ -1337,7 +1999,7 @@ function CompactTable() {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {alerts.slice(0, 4).map((alert) => (
+          {tableRows.map((alert) => (
             <Table.Tr key={alert.id}>
               <Table.Td>{alert.title}</Table.Td>
               <Table.Td>
@@ -1381,7 +2043,7 @@ function screenTitle(screen: ScreenId) {
     dashboard: 'Operations Dashboard',
     queue: 'Alert Queue',
     incident: 'Incident Room',
-    services: 'Service Detail',
+    services: 'Services',
     oncall: 'On-call & Escalation',
     silences: 'Silences & Rules',
     review: 'Post-Incident Review',
@@ -1395,7 +2057,7 @@ function screenDescription(screen: ScreenId) {
     dashboard: 'Shift-level risk, live incidents, service health and response quality in one operational surface.',
     queue: 'Dense triage queue with ownership, impact, evidence and action-ready inspector.',
     incident: 'Shared response room for roles, decisions, tasks, evidence and auditable handoff.',
-    services: 'Service-centered reliability view connecting current alerts with history, rules and dependencies.',
+    services: 'Service directory with ownership, reliability health, active risk and drill-down detail.',
     oncall: 'Coverage, escalation policy and handoff state across teams and time zones.',
     silences: 'Noise reduction with duration, reason, blast-radius preview and rule-quality feedback.',
     review: 'Incident learning workspace that turns timeline evidence into action items and alert improvements.',
