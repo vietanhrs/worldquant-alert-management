@@ -1663,17 +1663,17 @@ a {
   margin-bottom: 12px;
 }
 
-.incident-ticket-toolbar strong,
-.incident-ticket-toolbar span {
+.incident-ticket-toolbar > div > strong,
+.incident-ticket-toolbar > div > span {
   display: block;
 }
 
-.incident-ticket-toolbar strong {
+.incident-ticket-toolbar > div > strong {
   color: var(--text-primary);
   font-weight: 600;
 }
 
-.incident-ticket-toolbar span {
+.incident-ticket-toolbar > div > span {
   color: var(--text-secondary);
   font-size: 13px;
   margin-top: 3px;
