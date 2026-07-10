@@ -5,12 +5,15 @@ import {
   Avatar,
   Badge,
   Button,
+  Checkbox,
   Code,
   Divider,
   Group,
   MantineProvider,
   Menu,
   Modal,
+  MultiSelect,
+  NumberInput,
   Paper,
   Progress,
   RingProgress,
@@ -25,6 +28,7 @@ import {
   ThemeIcon,
   Timeline,
   Tooltip,
+  Switch,
   createTheme,
   useComputedColorScheme,
   useMantineColorScheme,
@@ -32,6 +36,7 @@ import {
 import type { MantineColorScheme } from '@mantine/core'
 import {
   IconAdjustments,
+  IconAlertTriangle,
   IconArrowLeft,
   IconArrowRight,
   IconBellRinging,
@@ -56,6 +61,7 @@ import {
   IconMenu2,
   IconMoon,
   IconPalette,
+  IconPencil,
   IconPlus,
   IconRadar,
   IconRoute,
@@ -65,6 +71,7 @@ import {
   IconShieldCheck,
   IconSun,
   IconTimeline,
+  IconTrash,
   IconUserCheck,
   IconUsersGroup,
   IconX,
@@ -120,6 +127,20 @@ type Incident = {
   responders: string[]
 }
 
+type PostMortemDocument = {
+  id: string
+  incidentId: string
+  title: string
+  service: string
+  owner: string
+  state: 'Draft' | 'In review' | 'Approved'
+  severity: Severity
+  incidentDate: string
+  due: string
+  actionItems: number
+  updated: string
+}
+
 type NavItem = {
   id: ScreenId
   label: string
@@ -143,6 +164,39 @@ type ServiceRow = {
   dependencyRisk: string
   runbooks: string
   lastIncident: string
+}
+
+type EscalationPolicy = {
+  id: string
+  service: string
+  name: string
+  enabled: boolean
+  schedule: string
+  timezone: string
+  severityScope: Severity[]
+  environmentScope: string[]
+  l1After: number
+  l2After: number
+  commanderAfter: number
+  primary: string
+  secondary: string
+  commander: string
+  notifyChannels: string[]
+  autoWarRoom: boolean
+  fallback: string
+  lastEdited: string
+}
+
+type SilenceRule = {
+  scope: string
+  service: string
+  environment: string
+  reason: string
+  owner: string
+  expires: string
+  affected: number
+  createdBy: string
+  createdAt: string
 }
 
 type OnCallView = 'day' | 'week' | 'two-weeks' | 'month'
@@ -180,7 +234,7 @@ const navItems: NavItem[] = [
     badge: '12',
   },
   { id: 'queue', label: 'Alert Queue', group: 'Monitor', icon: IconBellRinging, badge: '38' },
-  { id: 'incident', label: 'Incident Room', group: 'Respond', icon: IconTimeline, badge: '3' },
+  { id: 'incident', label: 'Incident Rooms', group: 'Respond', icon: IconTimeline, badge: '3' },
   { id: 'services', label: 'Services', group: 'Monitor', icon: IconServer },
   { id: 'oncall', label: 'On-call', group: 'Respond', icon: IconCalendarTime },
   { id: 'silences', label: 'Silences & Rules', group: 'Improve', icon: IconAdjustments },
@@ -411,6 +465,99 @@ const serviceRows: ServiceRow[] = [
   },
 ]
 
+const escalationPolicies: EscalationPolicy[] = [
+  {
+    id: 'WQ-EP-1001',
+    service: 'md-ingest-equities-us',
+    name: 'Market data Tier 0',
+    enabled: true,
+    schedule: 'Market Data Platform',
+    timezone: 'Asia/Singapore (UTC+8)',
+    severityScope: ['critical', 'high'],
+    environmentScope: ['Production'],
+    l1After: 5,
+    l2After: 15,
+    commanderAfter: 30,
+    primary: 'Trang Pham',
+    secondary: 'Leon Wu',
+    commander: 'Maya Chen',
+    notifyChannels: ['Phone', 'Slack', 'War room'],
+    autoWarRoom: true,
+    fallback: 'Page Platform Reliability if no owner after commander escalation',
+    lastEdited: 'Jul 10, 09:12 by Viet Anh Tran',
+  },
+  {
+    id: 'WQ-EP-1002',
+    service: 'brain-sim-cluster',
+    name: 'Research platform Tier 1',
+    enabled: true,
+    schedule: 'Research Platform',
+    timezone: 'Europe/London (UTC+1)',
+    severityScope: ['critical', 'high', 'warning'],
+    environmentScope: ['Production', 'Staging'],
+    l1After: 6,
+    l2After: 16,
+    commanderAfter: 30,
+    primary: 'Noah Singh',
+    secondary: 'Priya Rao',
+    commander: 'Maya Chen',
+    notifyChannels: ['Slack', 'Email'],
+    autoWarRoom: false,
+    fallback: 'Route to Research Platform team channel for business-hours review',
+    lastEdited: 'Jul 09, 18:31 by Maya Chen',
+  },
+  {
+    id: 'WQ-EP-1003',
+    service: 'hpc-storage-core',
+    name: 'HPC storage core',
+    enabled: true,
+    schedule: 'Platform Reliability',
+    timezone: 'America/New_York (UTC-4)',
+    severityScope: ['critical', 'high', 'warning'],
+    environmentScope: ['Production'],
+    l1After: 4,
+    l2After: 12,
+    commanderAfter: 25,
+    primary: 'Minh Tran',
+    secondary: 'Iris Tan',
+    commander: 'Hana Lee',
+    notifyChannels: ['Phone', 'Slack'],
+    autoWarRoom: true,
+    fallback: 'Escalate to storage SME rotation if primary and secondary miss acknowledgement',
+    lastEdited: 'Jul 08, 11:03 by Hana Lee',
+  },
+  {
+    id: 'WQ-EP-1004',
+    service: 'vendor-normalizer-apac',
+    name: 'Vendor data quality',
+    enabled: true,
+    schedule: 'Market Data Platform',
+    timezone: 'Asia/Singapore (UTC+8)',
+    severityScope: ['high', 'warning', 'info'],
+    environmentScope: ['Production'],
+    l1After: 7,
+    l2After: 17,
+    commanderAfter: 30,
+    primary: 'Trang Pham',
+    secondary: 'Leon Wu',
+    commander: 'Linh Dao',
+    notifyChannels: ['Slack', 'Email'],
+    autoWarRoom: false,
+    fallback: 'Create Data Operations review task if vendor alert remains assigned after 1 hour',
+    lastEdited: 'Jul 07, 16:45 by Linh Dao',
+  },
+]
+
+const severityOptions: { value: Severity; label: string }[] = [
+  { value: 'critical', label: 'Critical' },
+  { value: 'high', label: 'High' },
+  { value: 'warning', label: 'Warning' },
+  { value: 'info', label: 'Info' },
+]
+
+const environmentOptions = ['Production', 'Staging']
+const notificationChannelOptions = ['Phone', 'Slack', 'Email', 'War room']
+
 const timelineEvents = [
   {
     icon: IconBellRinging,
@@ -440,12 +587,6 @@ const timelineEvents = [
     time: '09:48:10 ICT',
     tone: 'warning',
   },
-]
-
-const incidentDataSources = [
-  'Alert automation writes fired, acknowledged, assigned, escalated and resolved events.',
-  'Responders submit decisions, evidence links and handoff notes from this room.',
-  'Correlation suggestions come from alert clusters, recent deploys, runbooks and past incidents.',
 ]
 
 const onCallShifts = [
@@ -510,20 +651,28 @@ const onCallViewDays: Record<OnCallView, number> = {
 
 const baseScheduleDate = new Date(2026, 6, 10)
 
-const silences = [
+const silences: SilenceRule[] = [
   {
     scope: 'research-api-staging',
+    service: 'research-api-staging',
+    environment: 'Staging',
     reason: 'Staging deploy validation',
     owner: 'Research Platform',
     expires: '42m',
     affected: 3,
+    createdBy: 'Priya Rao',
+    createdAt: '09:08 ICT',
   },
   {
     scope: 'vendor-normalizer-apac',
+    service: 'vendor-normalizer-apac',
+    environment: 'Production',
     reason: 'Vendor maintenance window',
     owner: 'Data Operations',
     expires: '2h 10m',
     affected: 7,
+    createdBy: 'Linh Dao',
+    createdAt: '08:20 ICT',
   },
 ]
 
@@ -531,6 +680,48 @@ const actionItems = [
   { title: 'Tune market data freshness threshold', owner: 'Trang', due: 'Jul 12', state: 'Open' },
   { title: 'Add vendor heartbeat evidence to runbook', owner: 'Leon', due: 'Jul 13', state: 'Doing' },
   { title: 'Backfill missing APAC quality dashboard', owner: 'Hana', due: 'Jul 17', state: 'Open' },
+]
+
+const postMortemDocuments: PostMortemDocument[] = [
+  {
+    id: 'WQ-PIR-2041',
+    incidentId: 'WQ-INC-4819',
+    title: 'US market data freshness delayed',
+    service: 'md-ingest-equities-us',
+    owner: 'Market Data Platform',
+    state: 'Draft',
+    severity: 'critical',
+    incidentDate: 'Jul 10, 2026',
+    due: 'Jul 12',
+    actionItems: 3,
+    updated: '14m ago',
+  },
+  {
+    id: 'WQ-PIR-2040',
+    incidentId: 'WQ-INC-4818',
+    title: 'Simulation cluster capacity degraded',
+    service: 'brain-sim-cluster',
+    owner: 'Research Platform',
+    state: 'In review',
+    severity: 'high',
+    incidentDate: 'Jul 09, 2026',
+    due: 'Jul 13',
+    actionItems: 5,
+    updated: '2h ago',
+  },
+  {
+    id: 'WQ-PIR-2038',
+    incidentId: 'WQ-INC-4815',
+    title: 'APAC vendor quality anomaly',
+    service: 'vendor-normalizer-apac',
+    owner: 'Data Operations',
+    state: 'Approved',
+    severity: 'warning',
+    incidentDate: 'Jul 07, 2026',
+    due: 'Jul 10',
+    actionItems: 2,
+    updated: '1d ago',
+  },
 ]
 
 function App() {
@@ -1131,123 +1322,223 @@ function AlertInspector({ alert }: { alert: AlertRow }) {
 }
 
 function IncidentRoom() {
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null)
+  const selectedIncident = incidents.find((incident) => incident.id === selectedIncidentId)
+
+  if (selectedIncident) {
+    return <IncidentRoomDetail incident={selectedIncident} onBack={() => setSelectedIncidentId(null)} />
+  }
+
   return (
-    <div className="incident-layout">
-      <Panel title="Incident status" icon={IconFlame} className="incident-left">
-        <div className="incident-status-card">
-          <SeverityPill severity="critical" />
-          <h3>US market data delayed for quant research</h3>
-          <p>Commander Maya Chen coordinating 3 responders across platform and data teams.</p>
+    <div className="screen-grid">
+      <Panel title="Active incident rooms" icon={IconTimeline} className="span-12">
+        <ActiveIncidentRoomsTable onOpen={setSelectedIncidentId} />
+      </Panel>
+    </div>
+  )
+}
+
+function ActiveIncidentRoomsTable({ onOpen }: { onOpen: (incidentId: string) => void }) {
+  return (
+    <Table.ScrollContainer minWidth={1120} className="table-wrap">
+      <Table className="ops-table" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Room</Table.Th>
+            <Table.Th>Severity</Table.Th>
+            <Table.Th>Status</Table.Th>
+            <Table.Th>Commander</Table.Th>
+            <Table.Th>Age</Table.Th>
+            <Table.Th>Impact</Table.Th>
+            <Table.Th>Responders</Table.Th>
+            <Table.Th>Action</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {incidents.map((incident) => (
+            <Table.Tr key={incident.id} onClick={() => onOpen(incident.id)}>
+              <Table.Td>
+                <div className={`severity-title severity-${incident.severity}`}>
+                  <span />
+                  <div>
+                    <strong>{incident.title}</strong>
+                    <small>{incident.id}</small>
+                  </div>
+                </div>
+              </Table.Td>
+              <Table.Td>
+                <SeverityPill severity={incident.severity} />
+              </Table.Td>
+              <Table.Td>
+                <Badge className="chip-info">{incident.state}</Badge>
+              </Table.Td>
+              <Table.Td>{incident.commander}</Table.Td>
+              <Table.Td>{incident.age}</Table.Td>
+              <Table.Td>{incident.impact}</Table.Td>
+              <Table.Td>
+                <Avatar.Group spacing="sm">
+                  {incident.responders.map((person) => (
+                    <Avatar key={person} radius="xl" color="wqGreen" size="sm">
+                      {person[0]}
+                    </Avatar>
+                  ))}
+                </Avatar.Group>
+              </Table.Td>
+              <Table.Td>
+                <Button
+                  className="btn-outline"
+                  size="xs"
+                  rightSection={<IconArrowRight size={14} />}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onOpen(incident.id)
+                  }}
+                >
+                  Open room
+                </Button>
+              </Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
+  )
+}
+
+function IncidentRoomDetail({ incident, onBack }: { incident: Incident; onBack: () => void }) {
+  const warRoomUrl = `https://meet.worldquant.example/${incident.id.toLowerCase()}`
+  const [techLead = 'Trang', comms = 'Priya', watcher = 'Leon'] = incident.responders
+  const roles = [
+    `Commander - ${incident.commander}`,
+    `Tech lead - ${techLead}`,
+    `Comms - ${comms}`,
+    `Watcher - ${watcher}`,
+  ]
+
+  return (
+    <div className="service-detail-view">
+      <div className="detail-subheader">
+        <Button className="btn-outline" leftSection={<IconArrowLeft size={16} />} onClick={onBack}>
+          Incident Rooms
+        </Button>
+        <div>
+          <Code>{incident.id}</Code>
+          <h2>{incident.title}</h2>
+          <p>
+            {incident.state} · Commander {incident.commander} · {incident.age}
+          </p>
         </div>
-        <div className="role-list">
-          {['Commander - Maya', 'Tech lead - Trang', 'Comms - Priya', 'Watcher - Leon'].map(
-            (role) => (
+      </div>
+
+      <div className="incident-layout">
+        <Panel title="Incident status" icon={IconFlame} className="incident-left">
+          <div className="incident-status-card">
+            <SeverityPill severity={incident.severity} />
+            <h3>{incident.title}</h3>
+            <p>
+              Commander {incident.commander} coordinating {incident.responders.length} responders
+              across platform and data teams.
+            </p>
+          </div>
+          <div className="role-list">
+            {roles.map((role) => (
               <div key={role}>
                 <IconUserCheck size={16} />
                 <span>{role}</span>
               </div>
-            ),
-          )}
-        </div>
-        <div className="war-room-card">
-          <div>
-            <IconUsersGroup size={18} />
+            ))}
+          </div>
+          <div className="war-room-card">
             <div>
-              <strong>War Room Meeting</strong>
-              <a href="https://meet.worldquant.example/wq-inc-4819">meet.worldquant.example/wq-inc-4819</a>
+              <IconUsersGroup size={18} />
+              <div>
+                <strong>War Room Meeting</strong>
+                <a href={warRoomUrl}>{warRoomUrl.replace('https://', '')}</a>
+              </div>
             </div>
-          </div>
-          <Button
-            className="btn-primary"
-            size="sm"
-            leftSection={<IconExternalLink size={16} />}
-            component="a"
-            href="https://meet.worldquant.example/wq-inc-4819"
-          >
-            Join now
-          </Button>
-        </div>
-      </Panel>
-
-      <Panel title="Decision timeline" icon={IconTimeline} className="incident-main">
-        <Timeline active={3} bulletSize={30} lineWidth={1} className="incident-timeline">
-          {timelineEvents.map((event) => {
-            const EventIcon = event.icon
-            return (
-              <Timeline.Item
-                key={event.title}
-                bullet={<EventIcon size={15} />}
-                title={event.title}
-                className={`timeline-${event.tone}`}
-              >
-                <Text size="sm">{event.body}</Text>
-                <Text size="xs" c="dimmed">
-                  {event.time}
-                </Text>
-              </Timeline.Item>
-            )
-          })}
-        </Timeline>
-
-        <Divider className="soft-divider" />
-
-        <div className="incident-entry-grid">
-          <div className="incident-entry-card">
-            <strong>Submit decision</strong>
-            <Textarea
-              className="control"
-              minRows={3}
-              placeholder="Decision, rationale, owner, expected next check"
-            />
-            <Button className="btn-primary" size="sm" leftSection={<IconSend size={16} />}>
-              Submit decision
+            <Button
+              className="btn-primary"
+              size="sm"
+              leftSection={<IconExternalLink size={16} />}
+              component="a"
+              href={warRoomUrl}
+            >
+              Join now
             </Button>
           </div>
-          <div className="incident-entry-card">
-            <strong>Add evidence</strong>
-            <TextInput className="control" placeholder="Dashboard or log URL" />
-            <Textarea
-              className="control"
-              minRows={2}
-              placeholder="Evidence summary"
-            />
-            <Button className="btn-outline" size="sm" leftSection={<IconPlus size={16} />}>
-              Add evidence
-            </Button>
-          </div>
-        </div>
+        </Panel>
 
-        <Divider className="soft-divider" />
+        <Panel title="Decision timeline" icon={IconTimeline} className="incident-main">
+          <Timeline active={3} bulletSize={30} lineWidth={1} className="incident-timeline">
+            {timelineEvents.map((event) => {
+              const EventIcon = event.icon
+              return (
+                <Timeline.Item
+                  key={event.title}
+                  bullet={<EventIcon size={15} />}
+                  title={event.title}
+                  className={`timeline-${event.tone}`}
+                >
+                  <Text size="sm">{event.body}</Text>
+                  <Text size="xs" c="dimmed">
+                    {event.time}
+                  </Text>
+                </Timeline.Item>
+              )
+            })}
+          </Timeline>
 
-        <div className="task-board">
-          {[
-            ['Check vendor heartbeat', 'Trang', 'Doing'],
-            ['Prepare stakeholder update', 'Priya', 'Open'],
-            ['Validate recovered batches', 'Leon', 'Blocked'],
-          ].map(([task, owner, state]) => (
-            <div key={task} className="task-card">
-              <strong>{task}</strong>
-              <span>{owner}</span>
-              <Badge className={state === 'Doing' ? 'chip-info' : 'chip-muted'}>{state}</Badge>
+          <Divider className="soft-divider" />
+
+          <div className="incident-entry-grid">
+            <div className="incident-entry-card">
+              <strong>Submit decision</strong>
+              <Textarea
+                className="control"
+                minRows={3}
+                placeholder="Decision, rationale, owner, expected next check"
+              />
+              <Button className="btn-primary" size="sm" leftSection={<IconSend size={16} />}>
+                Submit decision
+              </Button>
             </div>
-          ))}
-        </div>
-      </Panel>
+            <div className="incident-entry-card">
+              <strong>Add evidence</strong>
+              <TextInput className="control" placeholder="Dashboard or log URL" />
+              <Textarea className="control" minRows={2} placeholder="Evidence summary" />
+              <Button className="btn-outline" size="sm" leftSection={<IconPlus size={16} />}>
+                Add evidence
+              </Button>
+            </div>
+          </div>
 
-      <Panel title="Evidence" icon={IconBrain} className="incident-right">
-        <AICard />
-        <div className="evidence-stack">
-          <Evidence label="Linked alerts" value="8 alerts across 3 market data services" />
-          <Evidence label="Recent deploy" value="No matching deploy in 6h" />
-          <Evidence label="Similar incident" value="WQ-INC-4821, 91% match" />
-        </div>
-        <div className="source-list">
-          <strong>Data sources</strong>
-          {incidentDataSources.map((source) => (
-            <span key={source}>{source}</span>
-          ))}
-        </div>
-      </Panel>
+          <Divider className="soft-divider" />
+
+          <div className="task-board">
+            {[
+              ['Check current mitigation path', incident.responders[0] ?? incident.commander, 'Doing'],
+              ['Prepare stakeholder update', comms, 'Open'],
+              ['Validate recovered batches', watcher, 'Blocked'],
+            ].map(([task, owner, state]) => (
+              <div key={task} className="task-card">
+                <strong>{task}</strong>
+                <span>{owner}</span>
+                <Badge className={state === 'Doing' ? 'chip-info' : 'chip-muted'}>{state}</Badge>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel title="Evidence" icon={IconBrain} className="incident-right">
+          <AICard />
+          <div className="evidence-stack">
+            <Evidence label="Linked alerts" value={`8 alerts related to ${incident.id}`} />
+            <Evidence label="Recent deploy" value="No matching deploy in 6h" />
+            <Evidence label="Similar incident" value={`${incident.id.replace(/\d$/, '1')}, 91% match`} />
+            <Evidence label="Current impact" value={incident.impact} />
+          </div>
+        </Panel>
+      </div>
     </div>
   )
 }
@@ -1391,6 +1682,10 @@ function ServiceDetail({
   service: ServiceRow
   onBack: () => void
 }) {
+  const policy =
+    escalationPolicies.find((escalationPolicy) => escalationPolicy.service === service.service) ??
+    escalationPolicies[0]
+
   return (
     <div className="service-detail-view">
       <div className="detail-subheader">
@@ -1441,13 +1736,16 @@ function ServiceDetail({
         </Panel>
 
         <Panel title="Service workspace" icon={IconDatabase} className="span-12">
-          <Tabs defaultValue="alerts" className="wq-tabs">
+          <Tabs defaultValue="escalation" className="wq-tabs">
             <Tabs.List>
+              <Tabs.Tab value="escalation">Escalation Policy</Tabs.Tab>
               <Tabs.Tab value="alerts">Active Alerts</Tabs.Tab>
               <Tabs.Tab value="history">History</Tabs.Tab>
               <Tabs.Tab value="deps">Dependencies</Tabs.Tab>
-              <Tabs.Tab value="rules">Rules</Tabs.Tab>
             </Tabs.List>
+            <Tabs.Panel value="escalation">
+              <EscalationPolicyEditor service={service} policy={policy} />
+            </Tabs.Panel>
             <Tabs.Panel value="alerts">
               <CompactTable serviceName={service.service} />
             </Tabs.Panel>
@@ -1470,14 +1768,264 @@ function ServiceDetail({
                 )}
               </div>
             </Tabs.Panel>
-            <Tabs.Panel value="rules">
-              <RuleRecommendations />
-            </Tabs.Panel>
           </Tabs>
         </Panel>
       </div>
     </div>
   )
+}
+
+function EscalationPolicyEditor({
+  service,
+  policy,
+}: {
+  service: ServiceRow
+  policy: EscalationPolicy
+}) {
+  const [policyName, setPolicyName] = useState(policy.name)
+  const [enabled, setEnabled] = useState(policy.enabled)
+  const [schedule, setSchedule] = useState(policy.schedule)
+  const [timezone, setTimezone] = useState(policy.timezone)
+  const [severityScope, setSeverityScope] = useState<Severity[]>(policy.severityScope)
+  const [environmentScope, setEnvironmentScope] = useState(policy.environmentScope)
+  const [l1After, setL1After] = useState(policy.l1After)
+  const [l2After, setL2After] = useState(policy.l2After)
+  const [commanderAfter, setCommanderAfter] = useState(policy.commanderAfter)
+  const [primary, setPrimary] = useState(policy.primary)
+  const [secondary, setSecondary] = useState(policy.secondary)
+  const [commander, setCommander] = useState(policy.commander)
+  const [notifyChannels, setNotifyChannels] = useState(policy.notifyChannels)
+  const [autoWarRoom, setAutoWarRoom] = useState(policy.autoWarRoom)
+  const [fallback, setFallback] = useState(policy.fallback)
+
+  const scheduleOptions = onCallScheduleRows.map((row) => ({
+    value: row.team,
+    label: `${row.team} · ${row.timezone}`,
+  }))
+  const responderOptions = Array.from(
+    new Set(onCallScheduleRows.flatMap((row) => row.shifts.map((shift) => shift.person))),
+  ).map((person) => ({ value: person, label: person }))
+  const selectedScheduleTimezone =
+    onCallScheduleRows.find((row) => row.team === schedule)?.timezone ?? timezone
+  const timingIsValid = l1After < l2After && l2After < commanderAfter
+
+  return (
+    <div className="policy-editor">
+      <div className="policy-editor-grid">
+        <div className="policy-editor-section">
+          <div className="policy-section-heading">
+            <IconShieldCheck size={18} />
+            <div>
+              <strong>Policy scope</strong>
+              <span>{policy.id} controls alert routing for this service</span>
+            </div>
+          </div>
+
+          <Switch
+            checked={enabled}
+            onChange={(event) => setEnabled(event.currentTarget.checked)}
+            label="Policy enabled"
+            className="policy-switch"
+          />
+          <TextInput
+            label="Policy name"
+            value={policyName}
+            onChange={(event) => setPolicyName(event.currentTarget.value)}
+            className="control"
+          />
+          <Select
+            label="On-call schedule"
+            value={schedule}
+            onChange={(value) => {
+              const nextSchedule = value ?? schedule
+              setSchedule(nextSchedule)
+              setTimezone(
+                onCallScheduleRows.find((row) => row.team === nextSchedule)?.timezone ?? timezone,
+              )
+            }}
+            data={scheduleOptions}
+            className="control"
+          />
+          <TextInput
+            label="Timezone"
+            value={selectedScheduleTimezone}
+            onChange={(event) => setTimezone(event.currentTarget.value)}
+            className="control"
+          />
+          <MultiSelect
+            label="Applies to severity"
+            value={severityScope}
+            onChange={(value) => setSeverityScope(value as Severity[])}
+            data={severityOptions}
+            className="control"
+          />
+          <Checkbox.Group
+            label="Environments"
+            value={environmentScope}
+            onChange={setEnvironmentScope}
+            className="policy-checkbox-group"
+          >
+            <Group gap="md">
+              {environmentOptions.map((environment) => (
+                <Checkbox key={environment} value={environment} label={environment} />
+              ))}
+            </Group>
+          </Checkbox.Group>
+        </div>
+
+        <div className="policy-editor-section">
+          <div className="policy-section-heading">
+            <IconRoute size={18} />
+            <div>
+              <strong>Escalation path</strong>
+              <span>Configure who gets paged and when ownership moves up</span>
+            </div>
+          </div>
+
+          <div className="policy-step-grid">
+            <Select
+              label="L1 primary"
+              value={primary}
+              onChange={(value) => setPrimary(value ?? primary)}
+              data={responderOptions}
+              className="control"
+            />
+            <NumberInput
+              label="Page after"
+              value={l1After}
+              min={0}
+              suffix=" min"
+              onChange={(value) => setL1After(numberInputValue(value, l1After))}
+              className="control"
+            />
+            <Select
+              label="L1 secondary"
+              value={secondary}
+              onChange={(value) => setSecondary(value ?? secondary)}
+              data={responderOptions}
+              className="control"
+            />
+            <NumberInput
+              label="Escalate after"
+              value={l2After}
+              min={1}
+              suffix=" min"
+              onChange={(value) => setL2After(numberInputValue(value, l2After))}
+              className="control"
+            />
+            <Select
+              label="Incident commander"
+              value={commander}
+              onChange={(value) => setCommander(value ?? commander)}
+              data={responderOptions}
+              className="control"
+            />
+            <NumberInput
+              label="Commander after"
+              value={commanderAfter}
+              min={1}
+              suffix=" min"
+              onChange={(value) => setCommanderAfter(numberInputValue(value, commanderAfter))}
+              className="control"
+            />
+          </div>
+
+          <MultiSelect
+            label="Notification channels"
+            value={notifyChannels}
+            onChange={setNotifyChannels}
+            data={notificationChannelOptions}
+            className="control"
+          />
+          <Switch
+            checked={autoWarRoom}
+            onChange={(event) => setAutoWarRoom(event.currentTarget.checked)}
+            label="Automatically create War Room for critical production alerts"
+            className="policy-switch"
+          />
+          <Textarea
+            label="Fallback rule"
+            value={fallback}
+            onChange={(event) => setFallback(event.currentTarget.value)}
+            minRows={3}
+            className="control"
+          />
+        </div>
+
+        <div className="policy-preview-section">
+          <div className="policy-section-heading">
+            <IconBellRinging size={18} />
+            <div>
+              <strong>Preview & validation</strong>
+              <span>What will happen when a matching alert fires</span>
+            </div>
+          </div>
+
+          <div className={enabled ? 'policy-status enabled' : 'policy-status disabled'}>
+            <strong>{enabled ? 'Enabled' : 'Disabled'}</strong>
+            <span>{service.service}</span>
+          </div>
+
+          <div className="policy-preview-flow">
+            <PolicyPreviewStep label="Alert fires" value={`${policyName} · ${service.tier}`} />
+            <PolicyPreviewStep label={`${l1After}m`} value={`Page ${primary}`} />
+            <PolicyPreviewStep label={`${l2After}m`} value={`Escalate to ${secondary}`} />
+            <PolicyPreviewStep
+              label={`${commanderAfter}m`}
+              value={`Open commander path with ${commander}`}
+            />
+          </div>
+
+          <div className="policy-validation-list">
+            <div className={severityScope.length ? 'validation-row ok' : 'validation-row warning'}>
+              <IconCheck size={16} />
+              <span>{severityScope.length ? 'Severity scope selected' : 'Select at least one severity'}</span>
+            </div>
+            <div className={environmentScope.length ? 'validation-row ok' : 'validation-row warning'}>
+              <IconCheck size={16} />
+              <span>{environmentScope.length ? 'Environment scope selected' : 'Select environment scope'}</span>
+            </div>
+            <div className={timingIsValid ? 'validation-row ok' : 'validation-row warning'}>
+              <IconClock size={16} />
+              <span>
+                {timingIsValid
+                  ? 'Escalation timing increases safely'
+                  : 'Timing must increase from L1 to commander'}
+              </span>
+            </div>
+          </div>
+
+          <div className="policy-summary-block">
+            <Meta label="Channels" value={notifyChannels.join(', ') || 'None'} />
+            <Meta label="War Room" value={autoWarRoom ? 'Auto-create for P1 production' : 'Manual only'} />
+            <Meta label="Last edited" value={policy.lastEdited} />
+          </div>
+
+          <div className="policy-action-row">
+            <Button className="btn-outline" leftSection={<IconCheck size={16} />}>
+              Save draft
+            </Button>
+            <Button className="btn-primary" leftSection={<IconShieldCheck size={16} />}>
+              Publish policy
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PolicyPreviewStep({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="policy-preview-step">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  )
+}
+
+function numberInputValue(value: string | number, fallback: number) {
+  return typeof value === 'number' ? value : fallback
 }
 
 function OnCallEscalation() {
@@ -1598,14 +2146,24 @@ function OnCallEscalation() {
 
       <Panel title="Escalation policies" icon={IconRoute} className="span-4">
         <div className="policy-stack">
-          {['Market data Tier 0', 'Research platform Tier 1', 'Vendor data quality'].map(
-            (policy, index) => (
-              <div key={policy} className="policy-card">
-                <strong>{policy}</strong>
-                <span>L1 after {index + 5}m · L2 after {index + 15}m · commander after 30m</span>
+          {escalationPolicies
+            .filter((policy) => policy.enabled)
+            .map((policy) => {
+              const service = serviceRows.find((row) => row.service === policy.service)
+
+              return (
+              <div key={policy.id} className="policy-card">
+                <strong>{policy.name}</strong>
+                <span>
+                  {service?.service ?? policy.service} · {policy.schedule}
+                </span>
+                <small>
+                  L1 after {policy.l1After}m · L2 after {policy.l2After}m · commander after{' '}
+                  {policy.commanderAfter}m
+                </small>
               </div>
-            ),
-          )}
+              )
+            })}
         </div>
       </Panel>
 
@@ -1623,100 +2181,516 @@ function OnCallEscalation() {
 }
 
 function SilencesAndRules() {
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'delete' | null>(null)
+  const [activeSilence, setActiveSilence] = useState<SilenceRule | null>(null)
+
+  const openSilenceModal = (mode: 'create' | 'edit' | 'delete', silence?: SilenceRule) => {
+    setActiveSilence(silence ?? null)
+    setModalMode(mode)
+  }
+
+  const closeSilenceModal = () => {
+    setModalMode(null)
+    setActiveSilence(null)
+  }
+
   return (
-    <div className="screen-grid">
-      <MetricCard label="Noisy alerts" value="14" tone="warning" detail="Repeated in 24h" />
-      <MetricCard label="Active silences" value="2" tone="info" detail="0 broad production" />
-      <MetricCard label="Missing runbooks" value="7" tone="critical" detail="2 critical rules" />
-      <MetricCard label="Rule suggestions" value="5" tone="success" detail="Evidence-backed" />
+    <>
+      <div className="screen-grid silences-grid">
+        <div className="silence-page-actions span-12">
+          <Button
+            className="btn-primary"
+            leftSection={<IconPlus size={16} />}
+            onClick={() => openSilenceModal('create')}
+          >
+            Create silence rule
+          </Button>
+        </div>
 
-      <Panel title="Active silences" icon={IconMoon} className="span-6">
-        <div className="silence-stack">
+        <MetricCard
+          className="span-3"
+          label="Muted alerts"
+          value="10"
+          tone="info"
+          detail="Covered by active silences"
+        />
+        <MetricCard
+          className="span-3"
+          label="Active silences"
+          value="2"
+          tone="success"
+          detail="0 broad production"
+        />
+        <MetricCard
+          className="span-3"
+          label="Expiring soon"
+          value="1"
+          tone="warning"
+          detail="Review within 1 hour"
+        />
+        <MetricCard
+          className="span-3"
+          label="Affected services"
+          value="2"
+          tone="info"
+          detail="Across staging and production"
+        />
+
+        <Panel title="Active silences" icon={IconMoon} className="span-12">
+          <ActiveSilencesTable
+            onEdit={(silence) => openSilenceModal('edit', silence)}
+            onDelete={(silence) => openSilenceModal('delete', silence)}
+          />
+        </Panel>
+      </div>
+
+      <SilenceRuleModal
+        mode={modalMode === 'edit' ? 'edit' : 'create'}
+        opened={modalMode === 'create' || modalMode === 'edit'}
+        silence={activeSilence}
+        onClose={closeSilenceModal}
+      />
+      <DeleteSilenceModal
+        opened={modalMode === 'delete'}
+        silence={activeSilence}
+        onClose={closeSilenceModal}
+      />
+    </>
+  )
+}
+
+function ActiveSilencesTable({
+  onEdit,
+  onDelete,
+}: {
+  onEdit: (silence: SilenceRule) => void
+  onDelete: (silence: SilenceRule) => void
+}) {
+  return (
+    <Table.ScrollContainer minWidth={1120} className="table-wrap">
+      <Table className="ops-table" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Scope</Table.Th>
+            <Table.Th>Service</Table.Th>
+            <Table.Th>Environment</Table.Th>
+            <Table.Th>Reason</Table.Th>
+            <Table.Th>Owner</Table.Th>
+            <Table.Th>Affected</Table.Th>
+            <Table.Th>Expires</Table.Th>
+            <Table.Th>Created</Table.Th>
+            <Table.Th>Actions</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
           {silences.map((silence) => (
-            <div key={silence.scope} className="silence-card">
-              <div>
-                <strong>{silence.scope}</strong>
-                <span>{silence.reason}</span>
-              </div>
-              <Badge className="chip-muted">{silence.expires}</Badge>
-              <small>
-                {silence.affected} alerts · {silence.owner}
-              </small>
-            </div>
+            <Table.Tr key={silence.scope}>
+              <Table.Td>
+                <div>
+                  <strong>{silence.scope}</strong>
+                  <small>Silence rule</small>
+                </div>
+              </Table.Td>
+              <Table.Td>
+                <Code>{silence.service}</Code>
+              </Table.Td>
+              <Table.Td>{silence.environment}</Table.Td>
+              <Table.Td>{silence.reason}</Table.Td>
+              <Table.Td>{silence.owner}</Table.Td>
+              <Table.Td>{silence.affected} alerts</Table.Td>
+              <Table.Td>
+                <Badge className="chip-muted">{silence.expires}</Badge>
+              </Table.Td>
+              <Table.Td>
+                <span>{silence.createdBy}</span>
+                <small>{silence.createdAt}</small>
+              </Table.Td>
+              <Table.Td>
+                <div className="row-action-group">
+                  <Tooltip label="Edit silence">
+                    <ActionIcon
+                      variant="subtle"
+                      className="icon-button"
+                      aria-label={`Edit ${silence.scope}`}
+                      onClick={() => onEdit(silence)}
+                    >
+                      <IconPencil size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="Delete silence">
+                    <ActionIcon
+                      variant="subtle"
+                      className="icon-button danger-icon-button"
+                      aria-label={`Delete ${silence.scope}`}
+                      onClick={() => onDelete(silence)}
+                    >
+                      <IconTrash size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                </div>
+              </Table.Td>
+            </Table.Tr>
           ))}
-        </div>
-      </Panel>
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
+  )
+}
 
-      <Panel title="Rule recommendations" icon={IconAdjustments} className="span-6">
-        <RuleRecommendations />
-      </Panel>
+function SilenceRuleModal({
+  mode,
+  opened,
+  silence,
+  onClose,
+}: {
+  mode: 'create' | 'edit'
+  opened: boolean
+  silence: SilenceRule | null
+  onClose: () => void
+}) {
+  const isEdit = mode === 'edit'
 
-      <Panel title="Create silence preview" icon={IconShieldCheck} className="span-12">
-        <div className="silence-flow">
-          {['Scope', 'Duration', 'Reason', 'Blast radius', 'Confirm'].map((step, index) => (
-            <div key={step} className={index === 3 ? 'flow-step active' : 'flow-step'}>
-              <span>{index + 1}</span>
-              <strong>{step}</strong>
-              <p>{silenceStepCopy(step)}</p>
-            </div>
-          ))}
+  return (
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title={isEdit ? `Edit silence · ${silence?.scope ?? ''}` : 'Create silence rule'}
+      size="lg"
+      centered
+      className="detail-modal"
+    >
+      <div className="silence-modal-form">
+        <TextInput
+          label="Scope"
+          defaultValue={silence?.scope ?? ''}
+          placeholder="service, label selector or environment"
+          className="control"
+        />
+        <TextInput
+          label="Service"
+          defaultValue={silence?.service ?? ''}
+          placeholder="service-name"
+          className="control"
+        />
+        <Select
+          label="Environment"
+          defaultValue={silence?.environment ?? 'Production'}
+          data={environmentOptions}
+          className="control"
+        />
+        <TextInput
+          label="Owner"
+          defaultValue={silence?.owner ?? ''}
+          placeholder="Owning team"
+          className="control"
+        />
+        <TextInput
+          label="Duration"
+          defaultValue={silence?.expires ?? '1h'}
+          placeholder="1h, 2h 30m, until deploy complete"
+          className="control"
+        />
+        <NumberInput
+          label="Affected alerts preview"
+          defaultValue={silence?.affected ?? 0}
+          min={0}
+          className="control"
+        />
+        <Textarea
+          label="Reason"
+          defaultValue={silence?.reason ?? ''}
+          placeholder="Why this silence is safe and when it should end"
+          minRows={3}
+          className="control span-form-full"
+        />
+        <div className="silence-modal-actions span-form-full">
+          <Button className="btn-outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button className="btn-primary" leftSection={<IconShieldCheck size={16} />} onClick={onClose}>
+            {isEdit ? 'Save changes' : 'Create silence'}
+          </Button>
         </div>
-      </Panel>
-    </div>
+      </div>
+    </Modal>
+  )
+}
+
+function DeleteSilenceModal({
+  opened,
+  silence,
+  onClose,
+}: {
+  opened: boolean
+  silence: SilenceRule | null
+  onClose: () => void
+}) {
+  return (
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title="Delete silence rule"
+      size="md"
+      centered
+      className="detail-modal"
+    >
+      <div className="delete-confirm">
+        <ThemeIcon className="delete-confirm-icon" radius="xl">
+          <IconAlertTriangle size={22} />
+        </ThemeIcon>
+        <div>
+          <strong>{silence?.scope ?? 'Selected silence'}</strong>
+          <p>
+            Deleting this silence will allow matching alerts to fire again immediately. This action
+            should be recorded in the audit trail.
+          </p>
+        </div>
+        <div className="silence-modal-actions">
+          <Button className="btn-outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button className="btn-warning" leftSection={<IconTrash size={16} />} onClick={onClose}>
+            Delete silence
+          </Button>
+        </div>
+      </div>
+    </Modal>
   )
 }
 
 function PostIncidentReview() {
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const selectedDocument = postMortemDocuments.find((document) => document.id === selectedDocumentId)
+
+  if (selectedDocument) {
+    return (
+      <PostIncidentDetail
+        document={selectedDocument}
+        onBack={() => setSelectedDocumentId(null)}
+      />
+    )
+  }
+
   return (
-    <div className="review-layout">
-      <Panel title="Review outline" icon={IconFileAnalytics} className="review-outline">
-        {[
-          ['Executive summary', 'US market data freshness degraded for 31 minutes.'],
-          ['Impact', 'Research refresh delayed for US equities factor workflows.'],
-          ['Root cause', 'Vendor delivery lag with missing heartbeat escalation.'],
-          ['What went well', 'Responder ownership established within 4 minutes.'],
-          ['What to improve', 'Runbook lacked vendor heartbeat validation step.'],
-        ].map(([label, value]) => (
-          <div key={label} className="outline-block">
-            <span>{label}</span>
-            <p>{value}</p>
-          </div>
-        ))}
-      </Panel>
-
-      <Panel title="Evidence timeline" icon={IconTimeline} className="review-timeline">
-        <div className="mini-timeline large">
-          {timelineEvents.map((event) => (
-            <TimelineEntry key={event.title} event={event} />
-          ))}
+    <>
+      <div className="screen-grid">
+        <div className="silence-page-actions span-12">
+          <Button
+            className="btn-primary"
+            leftSection={<IconPlus size={16} />}
+            onClick={() => setCreateModalOpen(true)}
+          >
+            Create post-mortem
+          </Button>
         </div>
-      </Panel>
 
-      <Panel title="Action items" icon={IconListCheck} className="review-actions">
-        <div className="action-item-stack">
-          {actionItems.map((item) => (
-            <div key={item.title} className="action-item">
-              <div>
-                <strong>{item.title}</strong>
-                <span>
-                  {item.owner} · due {item.due}
-                </span>
-              </div>
-              <Badge className={item.state === 'Doing' ? 'chip-info' : 'chip-muted'}>
-                {item.state}
-              </Badge>
+        <Panel title="Post-mortem documents" icon={IconFileAnalytics} className="span-12">
+          <PostMortemDocumentsTable onOpen={setSelectedDocumentId} />
+        </Panel>
+      </div>
+
+      <CreatePostMortemModal
+        opened={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+      />
+    </>
+  )
+}
+
+function PostMortemDocumentsTable({ onOpen }: { onOpen: (documentId: string) => void }) {
+  return (
+    <Table.ScrollContainer minWidth={1080} className="table-wrap">
+      <Table className="ops-table" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Document</Table.Th>
+            <Table.Th>Incident</Table.Th>
+            <Table.Th>Severity</Table.Th>
+            <Table.Th>Status</Table.Th>
+            <Table.Th>Service</Table.Th>
+            <Table.Th>Owner</Table.Th>
+            <Table.Th>Incident date</Table.Th>
+            <Table.Th>Due</Table.Th>
+            <Table.Th>Action items</Table.Th>
+            <Table.Th>Updated</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {postMortemDocuments.map((document) => (
+            <Table.Tr key={document.id} onClick={() => onOpen(document.id)}>
+              <Table.Td>
+                <div className={`severity-title severity-${document.severity}`}>
+                  <span />
+                  <div>
+                    <strong>{document.title}</strong>
+                    <small>{document.id}</small>
+                  </div>
+                </div>
+              </Table.Td>
+              <Table.Td>
+                <Code>{document.incidentId}</Code>
+              </Table.Td>
+              <Table.Td>
+                <SeverityPill severity={document.severity} />
+              </Table.Td>
+              <Table.Td>
+                <Badge
+                  className={
+                    document.state === 'Approved'
+                      ? 'chip-success'
+                      : document.state === 'In review'
+                        ? 'chip-info'
+                        : 'chip-muted'
+                  }
+                >
+                  {document.state}
+                </Badge>
+              </Table.Td>
+              <Table.Td>
+                <Code>{document.service}</Code>
+              </Table.Td>
+              <Table.Td>{document.owner}</Table.Td>
+              <Table.Td>{document.incidentDate}</Table.Td>
+              <Table.Td>{document.due}</Table.Td>
+              <Table.Td>{document.actionItems}</Table.Td>
+              <Table.Td>{document.updated}</Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
+  )
+}
+
+function CreatePostMortemModal({
+  opened,
+  onClose,
+}: {
+  opened: boolean
+  onClose: () => void
+}) {
+  return (
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title="Create post-mortem document"
+      centered
+      size="lg"
+      className="detail-modal"
+    >
+      <div className="silence-modal-form">
+        <Select
+          label="Incident"
+          className="control"
+          defaultValue={incidents[0]?.id}
+          data={incidents.map((incident) => ({
+            value: incident.id,
+            label: `${incident.id} · ${incident.title}`,
+          }))}
+        />
+        <TextInput label="Owner" className="control" defaultValue="Market Data Platform" />
+        <TextInput
+          label="Title"
+          className="control span-form-full"
+          defaultValue="US market data freshness delayed"
+        />
+        <TextInput label="Service" className="control" defaultValue="md-ingest-equities-us" />
+        <TextInput label="Due date" className="control" defaultValue="Jul 12, 2026" />
+        <Textarea
+          label="Initial summary"
+          className="control span-form-full"
+          minRows={4}
+          placeholder="Impact, suspected root cause, unresolved questions, and required evidence"
+        />
+        <div className="silence-modal-actions span-form-full">
+          <Button className="btn-outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button className="btn-primary" leftSection={<IconPlus size={16} />} onClick={onClose}>
+            Create document
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+function PostIncidentDetail({
+  document,
+  onBack,
+}: {
+  document: PostMortemDocument
+  onBack: () => void
+}) {
+  return (
+    <div className="service-detail-view">
+      <div className="detail-subheader">
+        <Button className="btn-outline" leftSection={<IconArrowLeft size={16} />} onClick={onBack}>
+          Post-Incident
+        </Button>
+        <div>
+          <Code>{document.id}</Code>
+          <h2>{document.title}</h2>
+          <p>
+            {document.incidentId} · {document.state} · owner {document.owner}
+          </p>
+        </div>
+      </div>
+
+      <div className="review-layout">
+        <Panel title="Review outline" icon={IconFileAnalytics} className="review-outline">
+          {[
+            [
+              'Executive summary',
+              `${document.title} affected ${document.service} during the ${document.incidentDate} response window.`,
+            ],
+            ['Impact', 'Research refresh delayed for the affected quant workflows.'],
+            ['Root cause', 'Vendor delivery lag with missing heartbeat escalation.'],
+            ['What went well', 'Responder ownership established within 4 minutes.'],
+            ['What to improve', 'Runbook lacked vendor heartbeat validation step.'],
+          ].map(([label, value]) => (
+            <div key={label} className="outline-block">
+              <span>{label}</span>
+              <p>{value}</p>
             </div>
           ))}
-        </div>
-      </Panel>
+        </Panel>
 
-      <Panel title="Alert quality feedback" icon={IconClipboardCheck} className="review-quality">
-        <div className="feedback-grid">
-          <QualityMetric label="Fired early enough" value={76} />
-          <QualityMetric label="Correct owner" value={92} />
-          <QualityMetric label="Runbook helpful" value={54} />
-        </div>
-      </Panel>
+        <Panel title="Evidence timeline" icon={IconTimeline} className="review-timeline">
+          <div className="mini-timeline large">
+            {timelineEvents.map((event) => (
+              <TimelineEntry key={event.title} event={event} />
+            ))}
+          </div>
+        </Panel>
+
+        <Panel title="Action items" icon={IconListCheck} className="review-actions">
+          <div className="action-item-stack">
+            {actionItems.map((item) => (
+              <div key={item.title} className="action-item">
+                <div>
+                  <strong>{item.title}</strong>
+                  <span>
+                    {item.owner} · due {item.due}
+                  </span>
+                </div>
+                <Badge className={item.state === 'Doing' ? 'chip-info' : 'chip-muted'}>
+                  {item.state}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel title="Alert quality feedback" icon={IconClipboardCheck} className="review-quality">
+          <div className="feedback-grid">
+            <QualityMetric label="Fired early enough" value={76} />
+            <QualityMetric label="Correct owner" value={92} />
+            <QualityMetric label="Runbook helpful" value={54} />
+          </div>
+        </Panel>
+      </div>
     </div>
   )
 }
@@ -1883,14 +2857,16 @@ function MetricCard({
   value,
   detail,
   tone,
+  className,
 }: {
   label: string
   value: string
   detail: string
   tone: 'critical' | 'warning' | 'success' | 'info'
+  className?: string
 }) {
   return (
-    <Paper className={`metric-card tone-${tone}`}>
+    <Paper className={className ? `metric-card tone-${tone} ${className}` : `metric-card tone-${tone}`}>
       <span>{label}</span>
       <strong>{value}</strong>
       <p>{detail}</p>
@@ -2015,34 +2991,11 @@ function CompactTable({ serviceName }: { serviceName?: string }) {
   )
 }
 
-function RuleRecommendations() {
-  return (
-    <div className="recommendation-stack">
-      {[
-        ['Add grouping key', '8 alerts share vendor and region labels.'],
-        ['Require runbook', '2 critical rules have no responder checklist.'],
-        ['Tune threshold', 'Rule fired 12 times without human action.'],
-      ].map(([title, body]) => (
-        <div key={title} className="recommendation-card">
-          <IconBrain size={17} />
-          <div>
-            <strong>{title}</strong>
-            <span>{body}</span>
-          </div>
-          <Button size="xs" className="btn-outline">
-            Review
-          </Button>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 function screenTitle(screen: ScreenId) {
   const titles: Record<ScreenId, string> = {
     dashboard: 'Operations Dashboard',
     queue: 'Alert Queue',
-    incident: 'Incident Room',
+    incident: 'Incident Rooms',
     services: 'Services',
     oncall: 'On-call & Escalation',
     silences: 'Silences & Rules',
@@ -2056,11 +3009,11 @@ function screenDescription(screen: ScreenId) {
   const descriptions: Record<ScreenId, string> = {
     dashboard: 'Shift-level risk, live incidents, service health and response quality in one operational surface.',
     queue: 'Dense triage queue with ownership, impact, evidence and action-ready inspector.',
-    incident: 'Shared response room for roles, decisions, tasks, evidence and auditable handoff.',
+    incident: 'Active incident room directory with drill-down response workspace for roles, decisions and evidence.',
     services: 'Service directory with ownership, reliability health, active risk and drill-down detail.',
     oncall: 'Coverage, escalation policy and handoff state across teams and time zones.',
-    silences: 'Noise reduction with duration, reason, blast-radius preview and rule-quality feedback.',
-    review: 'Incident learning workspace that turns timeline evidence into action items and alert improvements.',
+    silences: 'Manage active silences with scoped duration, ownership, audit reason and safe expiry.',
+    review: 'Post-incident document library with drill-down review workspace for evidence and action items.',
     validation: 'Discovery hypotheses, prototype tasks and metrics for validating the UX strategy.',
   }
   return descriptions[screen]
@@ -2082,17 +3035,6 @@ function appearanceLabel(colorScheme: MantineColorScheme, computed: 'light' | 'd
     return `System (${computed})`
   }
   return colorScheme === 'dark' ? 'Dark' : 'Light'
-}
-
-function silenceStepCopy(step: string) {
-  const copy: Record<string, string> = {
-    Scope: 'Alert, service, labels or environment',
-    Duration: 'Default finite window with expiry',
-    Reason: 'Required audit note',
-    'Blast radius': 'Affected alerts and services preview',
-    Confirm: 'Recorded actor, time and scope',
-  }
-  return copy[step]
 }
 
 function screenFromHash(): ScreenId {
