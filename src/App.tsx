@@ -63,7 +63,6 @@ import {
   IconPalette,
   IconPencil,
   IconPlus,
-  IconRadar,
   IconRoute,
   IconSearch,
   IconSend,
@@ -85,7 +84,7 @@ type ScreenId =
   | 'oncall'
   | 'silences'
   | 'review'
-  | 'validation'
+  | 'reports'
 
 type Severity = 'critical' | 'high' | 'warning' | 'info'
 
@@ -152,6 +151,18 @@ type IncidentTicket = {
   due: string
   source: string
   updated: string
+}
+
+type BarDatum = {
+  label: string
+  value: number
+  meta?: string
+}
+
+type PieDatum = {
+  label: string
+  value: number
+  color: string
 }
 
 type NavItem = {
@@ -252,7 +263,7 @@ const navItems: NavItem[] = [
   { id: 'oncall', label: 'On-call', group: 'Respond', icon: IconCalendarTime },
   { id: 'silences', label: 'Silences & Rules', group: 'Improve', icon: IconAdjustments },
   { id: 'review', label: 'Post-Incident', group: 'Improve', icon: IconFileAnalytics, badge: '5' },
-  { id: 'validation', label: 'Research Plan', group: 'Strategy', icon: IconRadar },
+  { id: 'reports', label: 'Reports', group: 'Analyze', icon: IconChartBar },
 ]
 
 const alerts: AlertRow[] = [
@@ -812,6 +823,59 @@ const postMortemDocuments: PostMortemDocument[] = [
   },
 ]
 
+const topServiceAlertStats: BarDatum[] = [
+  { label: 'md-ingest-equities-us', value: 128, meta: 'Market Data Platform' },
+  { label: 'brain-sim-cluster', value: 104, meta: 'Research Platform' },
+  { label: 'hpc-storage-core', value: 96, meta: 'Platform Reliability' },
+  { label: 'vendor-normalizer-apac', value: 87, meta: 'Data Operations' },
+  { label: 'research-api-prod', value: 82, meta: 'Research Platform' },
+  { label: 'factor-cache-global', value: 74, meta: 'Quant Platform' },
+  { label: 'signal-publisher-us', value: 69, meta: 'Market Data Platform' },
+  { label: 'portfolio-risk-engine', value: 61, meta: 'Risk Platform' },
+  { label: 'feature-store-write', value: 55, meta: 'ML Platform' },
+  { label: 'alpha-backtest-api', value: 49, meta: 'Research Platform' },
+  { label: 'vendor-feed-eu', value: 44, meta: 'Data Operations' },
+  { label: 'notebook-session-gateway', value: 39, meta: 'Research Platform' },
+  { label: 'market-calendar-sync', value: 34, meta: 'Market Data Platform' },
+  { label: 'auth-token-broker', value: 29, meta: 'Platform Reliability' },
+  { label: 'hpc-job-router', value: 24, meta: 'Compute Platform' },
+]
+
+const serviceErrorCodeStats: BarDatum[] = [
+  { label: 'DATA_FRESHNESS_LAG', value: 212, meta: 'Market data freshness' },
+  { label: 'UPSTREAM_TIMEOUT', value: 186, meta: 'Vendor/API timeout' },
+  { label: 'QUEUE_SATURATION', value: 153, meta: 'Worker backlog' },
+  { label: 'BATCH_VALIDATION_FAILED', value: 121, meta: 'Data quality check' },
+  { label: 'STORAGE_RETRY_EXHAUSTED', value: 98, meta: 'Storage retries' },
+  { label: 'RATE_LIMITED', value: 84, meta: 'External dependency' },
+  { label: 'AUTH_TOKEN_EXPIRED', value: 62, meta: 'Auth/session' },
+  { label: 'RUNBOOK_MISSING', value: 47, meta: 'Operational readiness' },
+  { label: 'SCHEMA_MISMATCH', value: 39, meta: 'Payload contract' },
+  { label: 'DEPLOY_HEALTHCHECK_FAIL', value: 28, meta: 'Release validation' },
+]
+
+const clientScreenErrorStats: PieDatum[] = [
+  { label: 'Alert Queue', value: 31, color: '#0c66e4' },
+  { label: 'Service Detail', value: 22, color: '#22a06b' },
+  { label: 'Incident Room', value: 18, color: '#ff991f' },
+  { label: 'On-call', value: 12, color: '#ae2e24' },
+  { label: 'Silences', value: 10, color: '#6e5dc6' },
+  { label: 'Reports', value: 7, color: '#8590a2' },
+]
+
+const clientErrorMessageStats: BarDatum[] = [
+  { label: 'Failed to load alert inspector evidence', value: 94, meta: 'Alert Queue' },
+  { label: 'Runbook preview timed out', value: 77, meta: 'Alert Queue' },
+  { label: 'Service dependency graph failed to render', value: 63, meta: 'Service Detail' },
+  { label: 'War room meeting link could not be generated', value: 58, meta: 'Incident Room' },
+  { label: 'On-call schedule range request failed', value: 51, meta: 'On-call' },
+  { label: 'Silence scope validation returned stale data', value: 44, meta: 'Silences' },
+  { label: 'Post-incident evidence timeline failed to sync', value: 37, meta: 'Post-Incident' },
+  { label: 'Alert queue filters could not be restored', value: 34, meta: 'Alert Queue' },
+  { label: 'Escalation policy draft could not be saved', value: 29, meta: 'Service Detail' },
+  { label: 'Client session expired while loading workspace', value: 25, meta: 'Global shell' },
+]
+
 function App() {
   return (
     <MantineProvider theme={theme} defaultColorScheme="auto">
@@ -957,7 +1021,7 @@ function Workspace() {
           </div>
 
           <ScrollArea className="sidebar-scroll">
-            {['Monitor', 'Respond', 'Improve', 'Strategy'].map((group) => (
+            {['Monitor', 'Respond', 'Improve', 'Analyze'].map((group) => (
               <nav key={group} className="nav-group" aria-label={group}>
                 <span>{group}</span>
                 {navItems
@@ -1021,8 +1085,8 @@ function renderScreen(activeScreen: ScreenId) {
       return <SilencesAndRules />
     case 'review':
       return <PostIncidentReview />
-    case 'validation':
-      return <ResearchPlan />
+    case 'reports':
+      return <ReportsScreen />
   }
 }
 
@@ -2954,74 +3018,185 @@ function PostIncidentDetail({
   )
 }
 
-function ResearchPlan() {
+function ReportsScreen() {
   return (
     <div className="screen-grid">
-      <Panel title="Core hypotheses" icon={IconRadar} className="span-7">
-        <div className="hypothesis-stack">
-          {[
-            'Responders need ownership, impact, evidence and next action before acknowledgement.',
-            'Incident collaboration needs roles, timeline and evidence in one shared room.',
-            'AI suggestions are useful only when confidence is paired with visible evidence.',
-            'Alert noise improvement must preserve auditability and blast-radius awareness.',
-          ].map((hypothesis, index) => (
-            <div key={hypothesis} className="hypothesis-card">
-              <span>H{index + 1}</span>
-              <p>{hypothesis}</p>
-            </div>
-          ))}
-        </div>
-      </Panel>
+      <Panel title="Alert and error reports" icon={IconChartBar} className="span-12 report-panel">
+        <Tabs defaultValue="services" className="wq-tabs report-tabs">
+          <Tabs.List>
+            <Tabs.Tab value="services" leftSection={<IconServer size={16} />}>
+              Services
+            </Tabs.Tab>
+            <Tabs.Tab value="client" leftSection={<IconDeviceDesktop size={16} />}>
+              Client
+            </Tabs.Tab>
+          </Tabs.List>
 
-      <Panel title="Prototype tasks" icon={IconClipboardCheck} className="span-5">
-        <div className="prototype-task-list">
-          {[
-            'Identify highest-priority alert',
-            'Acknowledge with safe ownership',
-            'Create an incident from related alerts',
-            'Write a structured handoff note',
-            'Silence planned maintenance safely',
-            'Generate review action items',
-          ].map((task) => (
-            <div key={task}>
-              <IconCheck size={16} />
-              <span>{task}</span>
+          <Tabs.Panel value="services">
+            <div className="report-tab-grid">
+              <ReportSummaryStrip
+                items={[
+                  ['Total alerts', '1,142', '+18% WoW'],
+                  ['Top service share', '11.2%', 'md-ingest-equities-us'],
+                  ['Unique error codes', '38', 'last 7 days'],
+                ]}
+              />
+              <div className="report-chart-card report-chart-wide">
+                <ReportChartHeading
+                  title="Top services by alert volume"
+                  meta="Last 7 days"
+                  value="15 services"
+                />
+                <HorizontalBarChart data={topServiceAlertStats} valueLabel="alerts" />
+              </div>
+              <div className="report-chart-card report-chart-wide">
+                <ReportChartHeading
+                  title="Most common service error codes"
+                  meta="Deduplicated by error code"
+                  value="10 codes"
+                />
+                <HorizontalBarChart data={serviceErrorCodeStats} valueLabel="events" compact />
+              </div>
             </div>
-          ))}
-        </div>
-      </Panel>
+          </Tabs.Panel>
 
-      <Panel title="Measurement matrix" icon={IconChartBar} className="span-12">
-        <Table.ScrollContainer minWidth={760} className="table-wrap">
-          <Table className="ops-table" verticalSpacing="sm">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Metric</Table.Th>
-                <Table.Th>Behavior</Table.Th>
-                <Table.Th>Screen</Table.Th>
-                <Table.Th>Target</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {[
-                ['Time to priority', 'Find highest-risk alert', 'Dashboard / Queue', '< 30s'],
-                ['Context confidence', 'Ack without external tabs', 'Inspector', '80%+'],
-                ['Handoff completeness', 'Next owner understands current state', 'Incident Room', '90%+'],
-                ['Silence safety', 'Choose correct scope', 'Silences & Rules', '0 critical mistakes'],
-              ].map(([metric, behavior, screen, target]) => (
-                <Table.Tr key={metric}>
-                  <Table.Td>{metric}</Table.Td>
-                  <Table.Td>{behavior}</Table.Td>
-                  <Table.Td>{screen}</Table.Td>
-                  <Table.Td>{target}</Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </Table.ScrollContainer>
+          <Tabs.Panel value="client">
+            <div className="report-tab-grid client-report-grid">
+              <ReportSummaryStrip
+                items={[
+                  ['Client errors', '480', '-6% WoW'],
+                  ['Most affected screen', '31%', 'Alert Queue'],
+                  ['Top message share', '19.6%', 'Inspector evidence'],
+                ]}
+              />
+              <div className="report-chart-card report-pie-card">
+                <ReportChartHeading
+                  title="Error share by screen"
+                  meta="Client-side errors"
+                  value="100%"
+                />
+                <PieDonutChart data={clientScreenErrorStats} />
+              </div>
+              <div className="report-chart-card report-message-card">
+                <ReportChartHeading
+                  title="Top client error messages"
+                  meta="Grouped by normalized message"
+                  value="10 messages"
+                />
+                <HorizontalBarChart data={clientErrorMessageStats} valueLabel="errors" />
+              </div>
+            </div>
+          </Tabs.Panel>
+        </Tabs>
       </Panel>
     </div>
   )
+}
+
+function ReportSummaryStrip({ items }: { items: [string, string, string][] }) {
+  return (
+    <div className="report-summary-strip">
+      {items.map(([label, value, meta]) => (
+        <div key={label} className="report-summary-item">
+          <span>{label}</span>
+          <strong>{value}</strong>
+          <small>{meta}</small>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function ReportChartHeading({
+  title,
+  meta,
+  value,
+}: {
+  title: string
+  meta: string
+  value: string
+}) {
+  return (
+    <div className="report-chart-heading">
+      <div>
+        <strong>{title}</strong>
+        <span>{meta}</span>
+      </div>
+      <Badge className="chip-muted">{value}</Badge>
+    </div>
+  )
+}
+
+function HorizontalBarChart({
+  data,
+  valueLabel,
+  compact = false,
+}: {
+  data: BarDatum[]
+  valueLabel: string
+  compact?: boolean
+}) {
+  const maxValue = Math.max(...data.map((item) => item.value))
+
+  return (
+    <div className={compact ? 'horizontal-bars compact' : 'horizontal-bars'}>
+      {data.map((item) => (
+        <div key={item.label} className="horizontal-bar-row">
+          <div className="bar-label">
+            <strong>{item.label}</strong>
+            {item.meta && <span>{item.meta}</span>}
+          </div>
+          <div className="bar-track" aria-hidden="true">
+            <div
+              className="bar-fill"
+              style={{ width: `${Math.max(6, Math.round((item.value / maxValue) * 100))}%` }}
+            />
+          </div>
+          <div className="bar-value">
+            <strong>{item.value}</strong>
+            <span>{valueLabel}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function PieDonutChart({ data }: { data: PieDatum[] }) {
+  const total = data.reduce((sum, item) => sum + item.value, 0)
+  const leading = data[0]
+
+  return (
+    <div className="pie-report">
+      <div className="pie-chart" style={{ background: pieGradient(data) }}>
+        <div>
+          <strong>{leading.value}%</strong>
+          <span>{leading.label}</span>
+        </div>
+      </div>
+      <div className="pie-legend">
+        {data.map((item) => (
+          <div key={item.label}>
+            <span style={{ background: item.color }} />
+            <strong>{item.label}</strong>
+            <small>{Math.round((item.value / total) * 100)}%</small>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function pieGradient(data: PieDatum[]) {
+  const total = data.reduce((sum, item) => sum + item.value, 0)
+  let cursor = 0
+  return `conic-gradient(${data
+    .map((item) => {
+      const start = cursor
+      cursor += (item.value / total) * 100
+      return `${item.color} ${start}% ${cursor}%`
+    })
+    .join(', ')})`
 }
 
 function addDays(date: Date, days: number) {
@@ -3259,7 +3434,7 @@ function screenTitle(screen: ScreenId) {
     oncall: 'On-call & Escalation',
     silences: 'Silences & Rules',
     review: 'Post-Incident Review',
-    validation: 'Research Validation',
+    reports: 'Reports',
   }
   return titles[screen]
 }
@@ -3273,7 +3448,7 @@ function screenDescription(screen: ScreenId) {
     oncall: 'Coverage, escalation policy and handoff state across teams and time zones.',
     silences: 'Manage active silences with scoped duration, ownership, audit reason and safe expiry.',
     review: 'Post-incident document library with drill-down review workspace for evidence and action items.',
-    validation: 'Discovery hypotheses, prototype tasks and metrics for validating the UX strategy.',
+    reports: 'Alert and client error analytics by service, error code, screen and message.',
   }
   return descriptions[screen]
 }
